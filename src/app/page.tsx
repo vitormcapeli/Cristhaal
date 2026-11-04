@@ -79,7 +79,7 @@ export default function Home() {
           <div className="sec-head">
             <div>
               <h2 id="ultimasTitle">Últimas publicações</h2>
-              <p>Relatos dos encontros, visitas e oficinas, escritos pela equipe.</p>
+              <p>Os relatos mais recentes dos encontros, visitas e oficinas, escritos pela equipe.</p>
             </div>
             <Link className="btn small" href="/publicacoes">Ver todas</Link>
           </div>

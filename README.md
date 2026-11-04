@@ -27,10 +27,11 @@ Abra http://localhost:3000.
 
 | Rota | Conteúdo |
 | --- | --- |
-| `/` | Logo se formando, a sigla como navegação, as três frentes (Educa, Experimenta, Inspira) e as últimas publicações |
+| `/` | Logo se formando, a sigla como navegação, as três frentes (Educa, Experimenta, Inspira) e as 3 publicações mais recentes já abertas |
 | `/publicacoes` | Lista com busca e filtros por frente e pelas letras de CRISTHAAL (os filtros ficam na URL, ex.: `?area=H`) |
 | `/publicacoes/[id]` | Publicação com capa, texto, galeria e navegação para a anterior e a próxima |
-| `/sobre` | História do projeto, Programa Decolar e coordenação |
+| `/galeria` | Todas as fotos das publicações, agrupadas por encontro |
+| `/quem-somos` | História do projeto, Programa Decolar, coordenação, objetivos e contato (Instagram) |
 | `/publicar` | Formulário de nova publicação com prévia ao vivo |
 
 ## Onde mexer

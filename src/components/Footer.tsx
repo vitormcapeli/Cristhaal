@@ -12,7 +12,8 @@ export function Footer() {
         </div>
         <div className="foot-links">
           <Link href="/publicacoes">Publicações</Link>
-          <Link href="/sobre">Sobre</Link>
+          <Link href="/galeria">Galeria</Link>
+          <Link href="/quem-somos">Quem somos</Link>
           <a href={INSTAGRAM} target="_blank" rel="noopener">Instagram @projetocristhaal</a>
         </div>
       </div>

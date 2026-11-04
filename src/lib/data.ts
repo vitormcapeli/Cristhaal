@@ -67,7 +67,7 @@ export const AUTHORS: Record<AutorKey, { nome: string; papel: string; ini: strin
   coord: { nome: "Coordenação", papel: "Professoras do projeto", ini: "CO", c: "#E6197F" },
 };
 
-// TODO: preencher com os nomes reais (a professora autorizou exibir os nomes na página Sobre).
+// TODO: preencher com os nomes reais (a professora autorizou exibir os nomes na página Quem somos).
 // `foto` aceita um caminho dentro de /public, por exemplo "/coordenacao/nome.jpg".
 export const COORDENACAO: { nome: string; area: string; ini: string; c: string; foto?: string }[] = [
   { nome: "Nome da professora", area: "Área de atuação", ini: "P1", c: "#E6197F" },
