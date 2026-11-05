@@ -167,6 +167,13 @@ a.row:hover { background: var(--soft) }
 .cover > svg, .cover > img { width: 100%; height: 100%; display: block; object-fit: cover }
 .prose { max-width: 68ch; font-size: 1.12rem; line-height: 1.72 }
 .prose ol.steps { margin: 8px 0 24px }
+/* Texto do post: cada bloco ocupa a coluna de texto, ou a largura escolhida no editor (data-w),
+   e pode ficar à esquerda, no centro ou à direita (data-al). */
+.prose.post-body { max-width: none; --col: 42rem }
+.prose.post-body > * { max-width: var(--col) }
+.prose.post-body > [data-w] { max-width: none }
+.prose.post-body > [data-al="center"] { margin-left: auto; margin-right: auto; text-align: center }
+.prose.post-body > [data-al="right"] { margin-left: auto; margin-right: 0; text-align: right }
 .prose-h2, .editor h2 { font-family: var(--display); font-size: 1.6rem; font-weight: 750; line-height: 1.15; letter-spacing: -.01em; margin: 36px 0 14px }
 .prose ul { padding-left: 1.4em; margin: 0 0 1em }
 .prose li { margin: 4px 0; padding-left: 4px }
@@ -269,7 +276,7 @@ a.row:hover { background: var(--soft) }
 .editing :is(.title-input, .editor, .fr-edit select) { border-radius: 8px; outline: 2px dashed transparent; outline-offset: 6px; transition: outline-color .2s }
 .editing :is(.title-input, .editor, .fr-edit select):hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
 .editing :is(.title-input, .editor, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
-.fr-edit select { appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 22px 2px 0; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 8px top 55%, right 3px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
+.fr-edit select { field-sizing: content; appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 22px 2px 0; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 8px top 55%, right 3px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
 .fr-edit select option { color: var(--ink); background: var(--surface) }
 .title-input { display: block; width: 100%; max-width: 800px; margin: 14px 0 18px; padding: 0; border: 0; background: transparent; color: var(--ink); resize: none; overflow: hidden; field-sizing: content; font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.015em }
 .title-input::placeholder { color: color-mix(in srgb, var(--muted) 60%, transparent) }
@@ -281,17 +288,72 @@ a.row:hover { background: var(--soft) }
 .cover-btn { position: absolute; right: 14px; bottom: 14px }
 .cover-btn:focus-within { outline: 2px solid var(--ink); outline-offset: 3px }
 .editor { position: relative; min-height: 9em; caret-color: var(--fc) }
-.editor.is-empty::before { content: attr(data-placeholder); position: absolute; inset: 0 0 auto; color: color-mix(in srgb, var(--muted) 70%, transparent); pointer-events: none }
+.editor.is-empty::before { content: attr(data-placeholder); position: absolute; inset: 0 0 auto; max-width: var(--col); color: color-mix(in srgb, var(--muted) 70%, transparent); pointer-events: none }
 .editor > :first-child { margin-top: 0 }
 .steps-embed { position: relative; margin: 8px 0 24px; padding: 4px 0 0; user-select: none; cursor: default }
 .steps-embed ol.steps { margin: 0 }
 .embed-x { position: absolute; top: -12px; right: 0; font: 700 .8rem/1 var(--body); padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; opacity: 0; transition: opacity .2s }
-.steps-embed:hover .embed-x, .embed-x:focus-visible { opacity: 1 }
+[data-block]:hover .embed-x, .embed-x:focus-visible { opacity: 1 }
 .ph-x { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: 800 1.1rem/1 var(--body); cursor: pointer }
 .ph-x:hover { background: var(--ink); color: var(--paper) }
 .add-tile { aspect-ratio: 4/3; display: grid; place-content: center; justify-items: center; gap: 6px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand-sm); color: var(--muted); font-weight: 700; cursor: pointer; position: relative }
 .add-tile:hover { color: var(--ink); border-color: var(--line) }
 .add-tile:focus-within { outline: 2px solid var(--ink); outline-offset: 2px }
+/* Alinhamento do título e dos subtítulos */
+.post-head.al-center { margin-inline: auto; text-align: center }
+.post-head.al-right { margin-left: auto; text-align: right }
+.post-head.al-center .meta { justify-content: center }
+.post-head.al-right .meta { justify-content: flex-end }
+.title-input { text-align: inherit }
+.editing { position: relative }
+.title-row { position: relative }
+.grip, .bt-add { width: 34px; height: 34px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--line) 30%, transparent); background: var(--surface); color: var(--ink); cursor: pointer; font: 700 1.3rem/1 var(--body); transition: border-color .15s, background .15s }
+.grip:hover, .bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
+.grip { cursor: ew-resize; touch-action: none }
+.grip:active { cursor: grabbing; background: var(--ink); color: var(--paper) }
+.title-grip { position: absolute; top: 50%; left: calc(100% + 12px); transform: translateY(-50%) }
+.al-right .title-grip { left: auto; right: calc(100% + 12px) }
+.editing .title-grip { opacity: .45; transition: opacity .2s }
+.editing .post-head:hover .title-grip, .title-grip:focus-visible, .title-grip:active { opacity: 1 }
+.al-guides { position: absolute; left: 0; right: 0; z-index: 5; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none }
+.al-guides span { display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; border: 2px dashed color-mix(in srgb, var(--fc) 45%, transparent); border-radius: 10px; font: 700 .72rem/1.4 var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; transform: translateY(-14px); height: calc(100% + 20px) }
+.al-guides span.on { background: color-mix(in srgb, var(--fc) 14%, transparent); border-color: var(--fc); color: var(--ink) }
+
+/* Blocos: o + abre as opções, a alça alinha subtítulos */
+.editor-wrap { position: relative }
+.block-tools { position: absolute; display: flex; gap: 6px; z-index: 20; opacity: 0; transition: opacity .2s; font-size: 1.12rem }
+.block-tools.above { transform: translateY(calc(-100% - 6px)) }
+.block-tools.above .block-menu { left: auto; right: 0 }
+.block-tools[hidden] { display: none }
+.resize-h { position: absolute; z-index: 15; width: 12px; padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; opacity: 0; transition: opacity .2s }
+.resize-h::before { content: ""; position: absolute; left: 4px; top: 50%; width: 4px; height: min(56px, 70%); min-height: 18px; transform: translateY(-50%); border-radius: 4px; background: var(--fc) }
+.resize-h::after { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; border-left: 2px dashed color-mix(in srgb, var(--fc) 40%, transparent) }
+.editor-wrap:hover .resize-h, .resize-h:focus-visible, .resize-h.on { opacity: 1 }
+.resize-h:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px }
+.resize-label { position: absolute; z-index: 25; transform: translateY(-50%); padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 700 .8rem/1 var(--body); white-space: nowrap; pointer-events: none }
+.resize-label[data-side="l"] { transform: translate(-100%, -50%) }
+.editor-wrap:hover .block-tools, .editor-wrap:focus-within .block-tools, .block-tools.open { opacity: 1 }
+.block-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: 290px; display: grid; gap: 2px; padding: 6px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--hand-sm); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--ink) 70%, transparent); font-size: 1rem }
+.block-menu button { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; text-align: left; padding: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; cursor: pointer }
+.block-menu button:hover, .block-menu button:focus-visible { background: var(--soft); outline: none }
+.block-menu b { display: block; font-size: .98rem }
+.block-menu small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.3 }
+.bm-ic { width: 38px; height: 38px; display: grid; place-items: center; border: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent); border-radius: 8px; background: var(--paper) }
+.bm-h { font: 800 1.15rem/1 var(--display) !important }
+.add-block { position: relative; margin-top: 18px }
+.add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 2px dashed color-mix(in srgb, var(--line) 35%, transparent); border-radius: 999px; background: transparent; color: var(--muted); font: 700 .95rem/1 var(--body); cursor: pointer; transition: color .15s, border-color .15s }
+.add-btn span { font-size: 1.25rem; line-height: .8 }
+.add-btn:hover, .add-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--line) }
+
+/* Imagem no meio do texto */
+.img-block { position: relative; margin: 28px 0 }
+.img-block img { display: block; width: 100%; height: auto; border: 2px solid var(--line); border-radius: var(--hand-sm) }
+.img-block figcaption, .img-leg { display: block; width: 100%; margin-top: 8px; font: .92rem/1.4 var(--body); color: var(--muted); text-align: center }
+.img-leg { border: 0; padding: 4px; background: transparent; border-radius: 6px; outline: 1.5px dashed transparent }
+.img-leg:hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
+.img-leg:focus { outline-color: var(--fc) }
+.img-leg::placeholder { color: color-mix(in srgb, var(--muted) 60%, transparent) }
+.img-block .embed-x { top: 10px; right: 10px }
 .preview-box { margin-top: 56px; max-width: 800px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand); padding: 18px }
 .field { display: grid; gap: 8px; margin-bottom: 20px }
 .field label, .field legend { font-weight: 700 }
@@ -354,7 +416,14 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
   *, *::before, *::after { animation: none !important; transition: none !important }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important }
 }
+@media (max-width: 900px) {
+  .title-grip, .al-right .title-grip { top: -38px; left: auto; right: 0; transform: none }
+  .al-right .title-grip { right: auto; left: 0 }
+}
 @media (max-width: 640px) {
+  /* No celular todo bloco ocupa a largura da tela; a largura escolhida vale para telas maiores. */
+  .prose.post-body > * { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important }
+  .resize-h { display: none }
   .tb-label, .save-state { display: none }
   .tb { min-width: 38px; padding: 0 8px }
   .tb-sep { margin: 0 1px }

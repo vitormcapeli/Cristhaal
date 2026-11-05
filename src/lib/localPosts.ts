@@ -42,10 +42,12 @@ export function useAllPosts() {
 
 const withoutPhotos = (p: Post): Post => ({ ...p, imagens: undefined });
 
-export function addLocalPost(post: Post, photos: string[]) {
+/** Salva a publicação. Devolve false se não coube no navegador (imagens demais). */
+export function addLocalPost(post: Post, photos: string[]): boolean {
   const next = [post, ...read()].map(withoutPhotos);
-  try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
+  try { localStorage.setItem(KEY, JSON.stringify(next)); } catch { return false; }
   if (photos.length) photoUrls.set(post.id, photos);
   cache = null;
   listeners.forEach((l) => l());
+  return true;
 }

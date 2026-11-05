@@ -1,3 +1,6 @@
+import type { CSSProperties } from "react";
+import type { Caixa } from "./data";
+
 // Formatação dentro de um parágrafo: **negrito** e *itálico*. Uma barra invertida escapa o caractere
 // seguinte (\* vira um asterisco de verdade). Lido por quem mostra o post e pelo editor.
 
@@ -31,3 +34,16 @@ export function parseInline(src: string): Trecho[] {
 
 /** Texto sem marcação, para o resumo da lista. */
 export const plainText = (s: string) => parseInline(s).map((x) => x.t).join("");
+
+export type BoxProps = { "data-al"?: string; "data-w"?: string; style?: CSSProperties };
+
+export const W_MIN = 25;
+export const validW = (w: unknown): w is number => typeof w === "number" && w >= W_MIN && w <= 100;
+
+/** Atributos de largura e alinhamento de um bloco, iguais no editor e na página do post. */
+export function boxProps(b: Caixa): BoxProps {
+  const p: BoxProps = {};
+  if (b.al === "center" || b.al === "right") p["data-al"] = b.al;
+  if (validW(b.w)) { p["data-w"] = String(b.w); p.style = { width: `${b.w}%` }; }
+  return p;
+}

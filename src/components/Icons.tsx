@@ -81,3 +81,11 @@ export function StepsIcon({ size = 20 }: P) {
     </svg>
   );
 }
+
+export function GripIcon({ size = 18 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3.5 12h17M3.5 12l3.5-3.5M3.5 12 7 15.5M20.5 12 17 8.5M20.5 12 17 15.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

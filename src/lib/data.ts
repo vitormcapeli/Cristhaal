@@ -7,8 +7,18 @@ export type AutorKey = "equipe" | "coord";
 
 export type Area = { k: AreaKey; l: string; n: string; c: string; rest: string };
 export type Frente = { nome: string; full: string; c: string; seed: number; text?: string };
+export type Alinhamento = "left" | "center" | "right";
+/** Largura (em % da largura do post) e alinhamento de um bloco. Sem `w`, ocupa a coluna de texto. */
+export type Caixa = { w?: number; al?: Alinhamento };
 /** Blocos do texto. Em `p` e `ul`, `**negrito**` e `*itálico*` (com `\` para escapar). */
-export type Bloco = { p: string } | { h: string } | { ul: string[] } | { steps: true };
+export type Bloco = (
+  | { p: string }
+  | { h: string }
+  | { ul: string[] }
+  | { img: string; leg?: string }
+  | { steps: true }
+) & Caixa;
+export const isAlinhamento = (s: unknown): s is Alinhamento => s === "left" || s === "center" || s === "right";
 
 export type Post = {
   id: string;
@@ -19,6 +29,8 @@ export type Post = {
   fotos: number;
   seed: number;
   titulo: string;
+  /** Alinhamento do cabeçalho (frente, título e dados). Sem valor, à esquerda. */
+  tituloAl?: Alinhamento;
   resumo: string;
   corpo: Bloco[];
   /** Fotos reais (URLs). Enquanto vazio, a galeria mostra ilustrações. */

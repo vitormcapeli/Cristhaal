@@ -32,7 +32,7 @@ export function PostArticle({ post: p, inFeed }: ArticleProps) {
 
   return (
     <article className={inFeed ? "post-full in-feed" : "post-full"}>
-      <div className="post-head">
+      <div className={p.tituloAl && p.tituloAl !== "left" ? `post-head al-${p.tituloAl}` : "post-head"}>
         <FrenteTag frente={p.frente} />
         <Title>{inFeed ? <Link href={href}>{p.titulo}</Link> : p.titulo}</Title>
         <div className="meta">
