@@ -4,6 +4,7 @@ import { FRENTES, fmtDate, type Post } from "@/lib/data";
 import { CrystalArt } from "./CrystalArt";
 import { AreaLetters, Author, FrenteTag, thumbName } from "./PostRow";
 import { PostBody } from "./RichText";
+import { validW } from "@/lib/rich";
 
 /** Fotos que aparecem por publicação no feed da página inicial; o resto fica na página do post. */
 const FEED_PHOTOS = 4;
@@ -32,7 +33,10 @@ export function PostArticle({ post: p, inFeed }: ArticleProps) {
 
   return (
     <article className={inFeed ? "post-full in-feed" : "post-full"}>
-      <div className={p.tituloAl && p.tituloAl !== "left" ? `post-head al-${p.tituloAl}` : "post-head"}>
+      <div
+        className={p.tituloAl && p.tituloAl !== "left" ? `post-head al-${p.tituloAl}` : "post-head"}
+        {...(validW(p.tituloW) ? { "data-w": String(p.tituloW), style: { width: `${p.tituloW}%` } } : null)}
+      >
         <FrenteTag frente={p.frente} />
         <Title>{inFeed ? <Link href={href}>{p.titulo}</Link> : p.titulo}</Title>
         <div className="meta">

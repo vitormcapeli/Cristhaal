@@ -16,7 +16,7 @@ import { useToast } from "./Toast";
 
 const DRAFT_KEY = "cristhaal-rascunho";
 
-type Draft = { titulo: string; tituloAl: Alinhamento; frente: FrenteKey; areas: AreaKey[]; corpo: Bloco[]; seed: number };
+type Draft = { titulo: string; tituloAl: Alinhamento; tituloW: number | null; frente: FrenteKey; areas: AreaKey[]; corpo: Bloco[]; seed: number };
 type Fmt = { bold: boolean; italic: boolean; list: boolean; h: boolean };
 /** O bloco sob o mouse ou o cursor, com a posição dele dentro do texto. */
 type Ativo = { el: HTMLElement; top: number; left: number; width: number; height: number; areaW: number; al: Alinhamento; w: number | null };
@@ -35,6 +35,19 @@ const keepSelection = (e: React.MouseEvent) => e.preventDefault();
 
 /** Largura da coluna de texto, igual a --col no CSS. */
 const COL_REM = 42;
+/** Largura padrão do cabeçalho do post, igual ao max-width de .post-head no CSS. */
+const HEAD_PX = 800;
+
+/**
+ * Largura (em %) para a posição x do ponteiro, conforme o bloco está alinhado. Perto da largura
+ * padrão (`padraoPx`) devolve null, que é "voltar ao padrão"; fora disso, de 5 em 5%.
+ */
+function larguraNoPonto(x: number, areaW: number, al: Alinhamento, left: number, padraoPx: number): number | null {
+  const px = al === "center" ? 2 * Math.abs(x - areaW / 2) : al === "right" ? areaW - x : x - left;
+  const pct = Math.max(W_MIN, Math.min(100, (px / areaW) * 100));
+  const padrao = Math.min(100, (padraoPx / areaW) * 100);
+  return Math.abs(pct - padrao) < 3 ? null : Math.round(pct / 5) * 5;
+}
 
 const alOf = (el: HTMLElement): Alinhamento => (isAlinhamento(el.dataset.al) ? el.dataset.al : "left");
 const medir = (el: HTMLElement): Ativo => {
@@ -45,7 +58,7 @@ const medir = (el: HTMLElement): Ativo => {
   };
 };
 const larguraAtual = (a: Ativo) => a.w ?? Math.round((a.width / a.areaW) * 100);
-const nomeLargura = (w: number | null) => (w === null ? "Coluna do texto" : w === 100 ? "Largura total" : `${w}% da largura`);
+const nomeLargura = (w: number | null, padrao = "Coluna do texto") => (w === null ? padrao : w === 100 ? "Largura total" : `${w}% da largura`);
 
 function PhotoPicker({ onFiles, className, children, title }: { onFiles: (f: File[]) => void; className: string; children: React.ReactNode; title?: string }) {
   return (
@@ -204,6 +217,8 @@ export function Composer() {
   const toast = useToast();
   const [titulo, setTitulo] = useState("");
   const [tituloAl, setTituloAl] = useState<Alinhamento>("left");
+  const [tituloW, setTituloW] = useState<number | null>(null);
+  const [rotuloTitulo, setRotuloTitulo] = useState<string | null>(null);
   const [frente, setFrente] = useState<FrenteKey>("educa");
   const [areas, setAreas] = useState<AreaKey[]>(["C"]);
   const [corpo, setCorpo] = useState<Bloco[]>([]);
@@ -238,6 +253,7 @@ export function Composer() {
     if (d && typeof d === "object") {
       if (typeof d.titulo === "string") setTitulo(d.titulo);
       if (isAlinhamento(d.tituloAl)) setTituloAl(d.tituloAl);
+      if (validW(d.tituloW)) setTituloW(d.tituloW);
       if (typeof d.frente === "string" && isFrenteKey(d.frente)) setFrente(d.frente);
       if (Array.isArray(d.areas)) setAreas(d.areas.filter((k) => typeof k === "string" && isAreaKey(k)));
     }
@@ -257,14 +273,14 @@ export function Composer() {
       if (publicado.current) return;
       try {
         if (vazio) localStorage.removeItem(DRAFT_KEY);
-        else localStorage.setItem(DRAFT_KEY, JSON.stringify({ titulo, tituloAl, frente, areas, corpo, seed } satisfies Draft));
+        else localStorage.setItem(DRAFT_KEY, JSON.stringify({ titulo, tituloAl, tituloW, frente, areas, corpo, seed } satisfies Draft));
         setSalvo(vazio ? "" : "salvo");
       } catch {
         setSalvo("cheio");
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [pronto, titulo, tituloAl, frente, areas, corpo, seed]);
+  }, [pronto, titulo, tituloAl, tituloW, frente, areas, corpo, seed]);
 
   // A barra de ferramentas gruda logo abaixo do cabeçalho do site, qualquer que seja a altura dele.
   useEffect(() => {
@@ -309,7 +325,7 @@ export function Composer() {
     if (!t) return;
     t.style.height = "auto";
     t.style.height = `${t.scrollHeight}px`;
-  }, [titulo, tituloAl]);
+  }, [titulo, tituloAl, tituloW]);
 
   const sync = () => {
     const ed = editorRef.current;
@@ -494,15 +510,11 @@ export function Composer() {
     btn.setPointerCapture(e.pointerId);
     const r = ed.getBoundingClientRect();
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const col = Math.min(100, ((COL_REM * rem) / r.width) * 100);
+    const colPx = COL_REM * rem;
     setArrasto({ tipo: "largura", top: a.top, h: a.height });
     setRotulo(nomeLargura(a.w));
     const move = (ev: PointerEvent) => {
-      const x = ev.clientX - r.left;
-      const px = a.al === "center" ? 2 * Math.abs(x - r.width / 2) : a.al === "right" ? r.width - x : x - a.left;
-      const pct = Math.max(W_MIN, Math.min(100, (px / r.width) * 100));
-      // Perto da largura da coluna de texto, encaixa nela.
-      const w = Math.abs(pct - col) < 3 ? null : Math.round(pct / 5) * 5;
+      const w = larguraNoPonto(ev.clientX - r.left, r.width, a.al, a.left, colPx);
       largura(a.el, w);
       setRotulo(nomeLargura(w));
     };
@@ -517,6 +529,42 @@ export function Composer() {
     btn.addEventListener("pointermove", move);
     btn.addEventListener("pointerup", up);
     btn.addEventListener("pointercancel", up);
+  };
+
+  /** Barrinha de largura do título: mesma ideia dos blocos, medida na largura do post. */
+  const startResizeTitulo = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const art = articleRef.current;
+    const head = headRef.current;
+    if (!art || !head || e.button !== 0) return;
+    e.preventDefault();
+    const btn = e.currentTarget;
+    btn.setPointerCapture(e.pointerId);
+    const r = art.getBoundingClientRect();
+    setRotuloTitulo(nomeLargura(tituloW, "Largura padrão"));
+    const move = (ev: PointerEvent) => {
+      const w = larguraNoPonto(ev.clientX - r.left, r.width, tituloAl, 0, HEAD_PX);
+      setTituloW(w);
+      setRotuloTitulo(nomeLargura(w, "Largura padrão"));
+    };
+    const up = () => {
+      btn.removeEventListener("pointermove", move);
+      btn.removeEventListener("pointerup", up);
+      btn.removeEventListener("pointercancel", up);
+      setRotuloTitulo(null);
+    };
+    btn.addEventListener("pointermove", move);
+    btn.addEventListener("pointerup", up);
+    btn.addEventListener("pointercancel", up);
+  };
+
+  const onResizeTituloKey = (e: React.KeyboardEvent) => {
+    const d = e.key === "ArrowRight" ? 5 : e.key === "ArrowLeft" ? -5 : 0;
+    const art = articleRef.current;
+    const head = headRef.current;
+    if (!d || !art || !head) return;
+    e.preventDefault();
+    const atual = tituloW ?? Math.round((head.offsetWidth / art.clientWidth) * 100);
+    setTituloW(Math.max(W_MIN, Math.min(100, Math.round((atual + d) / 5) * 5)));
   };
 
   const onResizeKey = (e: React.KeyboardEvent) => {
@@ -534,7 +582,7 @@ export function Composer() {
   const primeiro = corpo.find((b): b is { p: string } => "p" in b);
   const draft: Post = {
     id: "rascunho", frente, areas, autor: "equipe", data: hoje, fotos: fotos.length, seed,
-    titulo: titulo.trim(), tituloAl: tituloAl === "left" ? undefined : tituloAl,
+    titulo: titulo.trim(), tituloAl: tituloAl === "left" ? undefined : tituloAl, tituloW: tituloW ?? undefined,
     resumo: primeiro ? plainText(primeiro.p).slice(0, 180) : "O começo do texto aparece aqui.",
     corpo, imagens: fotos,
   };
@@ -615,7 +663,17 @@ export function Composer() {
 
       <article className="post-full editing" ref={articleRef}>
         {arrasto?.tipo === "titulo" && <Guides al={tituloAl} style={{ top: arrasto.top, height: arrasto.h }} />}
-        <div ref={headRef} className={tituloAl === "left" ? "post-head" : `post-head al-${tituloAl}`}>
+        <div
+          ref={headRef} className={tituloAl === "left" ? "post-head" : `post-head al-${tituloAl}`}
+          {...(tituloW !== null ? { "data-w": String(tituloW), style: { width: `${tituloW}%` } } : null)}
+        >
+          <button
+            type="button" className={`resize-h title-resize${rotuloTitulo ? " on" : ""}`}
+            title="Arraste para mudar a largura do título (dois cliques voltam à largura padrão)"
+            aria-label={`Largura do título: ${nomeLargura(tituloW, "largura padrão")}. Arraste ou use as setas.`}
+            onPointerDown={startResizeTitulo} onKeyDown={onResizeTituloKey} onDoubleClick={() => setTituloW(null)}
+          />
+          {rotuloTitulo && <span className="resize-label title-resize-label">{rotuloTitulo}</span>}
           <label className="fr fr-edit" style={{ "--fc": F.c } as React.CSSProperties}>
             <span className="sr-only">Frente</span>
             <select value={frente} onChange={(e) => setFrente(e.target.value as FrenteKey)}>
@@ -630,7 +688,7 @@ export function Composer() {
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusEditor(); } }}
             />
             <AlignGrip
-              className="title-grip" label="Posição do título" value={tituloAl} onChange={setTituloAl}
+              className={`title-grip${tituloW !== null && tituloW >= 90 ? " above" : ""}`} label="Posição do título" value={tituloAl} onChange={setTituloAl}
               area={() => articleRef.current}
               onDrag={(on) => { const h = headRef.current; setArrasto(on && h ? { tipo: "titulo", top: h.offsetTop, h: h.offsetHeight } : null); }}
             />

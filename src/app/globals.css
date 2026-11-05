@@ -161,6 +161,7 @@ a.row:hover { background: var(--soft) }
 .back { display: inline-flex; gap: 6px; color: var(--muted); text-decoration: none; font-weight: 700; margin-bottom: 28px }
 .back:hover { color: var(--ink) }
 .post-head { max-width: 800px }
+.post-head[data-w] { max-width: none }
 .post-head h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); font-weight: 800; margin: 14px 0 18px }
 .post > h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); margin-bottom: 16px }
 .cover { margin: 32px 0; border: 2px solid var(--line); border-radius: var(--hand); overflow: hidden; aspect-ratio: 21/8 }
@@ -278,7 +279,7 @@ a.row:hover { background: var(--soft) }
 .editing :is(.title-input, .editor, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
 .fr-edit select { field-sizing: content; appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 22px 2px 0; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 8px top 55%, right 3px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
 .fr-edit select option { color: var(--ink); background: var(--surface) }
-.title-input { display: block; width: 100%; max-width: 800px; margin: 14px 0 18px; padding: 0; border: 0; background: transparent; color: var(--ink); resize: none; overflow: hidden; field-sizing: content; font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.015em }
+.title-input { display: block; width: 100%; margin: 14px 0 18px; padding: 0; border: 0; background: transparent; color: var(--ink); resize: none; overflow: hidden; field-sizing: content; font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.015em }
 .title-input::placeholder { color: color-mix(in srgb, var(--muted) 60%, transparent) }
 .letters-edit { gap: 4px }
 .letters-edit .lt { width: 30px; height: 30px; padding: 0; border: 1.5px dashed var(--c); background: transparent; color: var(--c); cursor: pointer; font-size: .85rem; transition: background .15s, color .15s, transform .15s }
@@ -311,8 +312,18 @@ a.row:hover { background: var(--soft) }
 .grip:hover, .bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
 .grip { cursor: ew-resize; touch-action: none }
 .grip:active { cursor: grabbing; background: var(--ink); color: var(--paper) }
-.title-grip { position: absolute; top: 50%; left: calc(100% + 12px); transform: translateY(-50%) }
-.al-right .title-grip { left: auto; right: calc(100% + 12px) }
+.title-grip { position: absolute; top: 50%; left: calc(100% + 28px); transform: translateY(-50%) }
+.al-right .title-grip { left: auto; right: calc(100% + 28px) }
+/* Título muito largo: sem espaço ao lado, a alça sobe para cima dele. */
+.title-grip.above { top: -38px; left: auto; right: 0; transform: none }
+.al-right .title-grip.above { right: auto; left: 0 }
+/* Barrinha de largura do título, na borda do cabeçalho (do lado oposto quando ele está à direita) */
+.editing .post-head { position: relative }
+.title-resize { top: 0; bottom: 0; left: calc(100% + 6px) }
+.al-right .title-resize { left: auto; right: calc(100% + 6px) }
+.editing .post-head:hover .title-resize { opacity: 1 }
+.title-resize-label { top: 50%; left: calc(100% + 28px) }
+.al-right .title-resize-label { left: auto; right: calc(100% + 28px) }
 .editing .title-grip { opacity: .45; transition: opacity .2s }
 .editing .post-head:hover .title-grip, .title-grip:focus-visible, .title-grip:active { opacity: 1 }
 .al-guides { position: absolute; left: 0; right: 0; z-index: 5; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none }
@@ -422,7 +433,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
 }
 @media (max-width: 640px) {
   /* No celular todo bloco ocupa a largura da tela; a largura escolhida vale para telas maiores. */
-  .prose.post-body > * { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important }
+  .prose.post-body > *, .post-head[data-w] { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important }
   .resize-h { display: none }
   .tb-label, .save-state { display: none }
   .tb { min-width: 38px; padding: 0 8px }

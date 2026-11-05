@@ -31,6 +31,8 @@ export type Post = {
   titulo: string;
   /** Alinhamento do cabeçalho (frente, título e dados). Sem valor, à esquerda. */
   tituloAl?: Alinhamento;
+  /** Largura do cabeçalho, em % da largura do post. Sem valor, a largura padrão. */
+  tituloW?: number;
   resumo: string;
   corpo: Bloco[];
   /** Fotos reais (URLs). Enquanto vazio, a galeria mostra ilustrações. */
