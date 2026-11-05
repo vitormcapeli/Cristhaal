@@ -8,6 +8,8 @@ import { semAcento, textoBusca } from "@/lib/search";
 import { PostRow } from "./PostRow";
 
 type FrenteFilter = FrenteKey | "todas";
+/** Espera (ms) depois da última mudança nos filtros antes de gravar na URL. */
+const URL_DELAY = 300;
 type Params = { get(k: string): string | null; getAll(k: string): string[] };
 
 const lerFrente = (p: Params): FrenteFilter => {
@@ -33,6 +35,8 @@ export function PostBrowser() {
   const [areas, setAreas] = useState<Set<AreaKey>>(() => lerAreas(params));
   const [q, setQ] = useState(() => params.get("q") ?? "");
   const all = useAllPosts();
+  // O campo de busca não é controlado: o que a pessoa digita nunca é sobrescrito por uma renderização atrasada.
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Queries que este componente escreveu na URL e que o Next ainda não devolveu em `params`.
   // Uma query fora dessa fila veio de fora (link do menu, link de uma letra, Voltar/Avançar).
@@ -41,11 +45,16 @@ export function PostBrowser() {
   const visto = useRef(urlKey);
   const stateKey = paraQuery(frente, areas, q);
 
+  // Cada replaceState vira uma transição do roteador do Next. Escrever a cada tecla disputava com a
+  // digitação e fazia letras sumirem; por isso a URL só é atualizada quando a pessoa para de digitar.
   useEffect(() => {
     if (stateKey === escrito.current) return;
-    escrito.current = stateKey;
-    pendentes.current.push(stateKey);
-    window.history.replaceState(null, "", stateKey ? `?${stateKey}` : window.location.pathname);
+    const t = window.setTimeout(() => {
+      escrito.current = stateKey;
+      pendentes.current.push(stateKey);
+      window.history.replaceState(null, "", stateKey ? `?${stateKey}` : window.location.pathname);
+    }, URL_DELAY);
+    return () => window.clearTimeout(t);
   }, [stateKey]);
 
   useEffect(() => {
@@ -58,7 +67,9 @@ export function PostBrowser() {
     escrito.current = urlKey;
     setFrente(lerFrente(params));
     setAreas(lerAreas(params));
-    setQ(params.get("q") ?? "");
+    const nq = params.get("q") ?? "";
+    setQ(nq);
+    if (inputRef.current) inputRef.current.value = nq;
   }, [urlKey, params]);
 
   const list = useMemo(() => {
@@ -78,7 +89,12 @@ export function PostBrowser() {
       else next.add(k);
       return next;
     });
-  const clear = () => { setFrente("todas"); setAreas(new Set()); setQ(""); };
+  const clear = () => {
+    setFrente("todas");
+    setAreas(new Set());
+    setQ("");
+    if (inputRef.current) inputRef.current.value = "";
+  };
   const selected = [...areas].map((k) => AREA[k].n);
   const chips: [FrenteFilter, string, string | null][] = [["todas", "Todas", null], ...Object.entries(FRENTES).map(([k, f]) => [k as FrenteKey, f.nome, f.c] as [FrenteKey, string, string])];
 
@@ -91,7 +107,7 @@ export function PostBrowser() {
             <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
             <path d="M15.5 15.5L21 21" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
           </svg>
-          <input type="search" placeholder="Buscar por título, assunto ou trecho do texto" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input type="search" placeholder="Buscar por título, assunto ou trecho do texto" ref={inputRef} defaultValue={q} onChange={(e) => setQ(e.target.value)} />
         </label>
         <div className="chips" role="group" aria-label="Filtrar por frente">
           {chips.map(([k, n, c]) => (
