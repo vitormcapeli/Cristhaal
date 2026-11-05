@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  AREAS, FRENTES, fmtDate, isAlinhamento, isAreaKey, isFrenteKey,
+  AREAS, FRENTES, LOCAL_PREFIX, fmtDate, isAlinhamento, isAreaKey, isFrenteKey,
   type Alinhamento, type AreaKey, type Bloco, type FrenteKey, type Post,
 } from "@/lib/data";
 import { blocksToHtml, EMPTY_P, imageToDataUrl, imgHtml, inlineHtml, serialize, stepsHtml } from "@/lib/editor";
@@ -543,7 +543,7 @@ export function Composer() {
     if (!draft.titulo) { setErro("Falta o título da publicação."); titleRef.current?.focus(); return; }
     if (!corpo.length) { setErro("Falta o texto da publicação."); focusEditor(); return; }
     if (!areas.length) { setErro("Escolha pelo menos uma área (as letras ao lado da data)."); return; }
-    const id = `${slug(draft.titulo) || "publicacao"}-${Date.now().toString(36)}`;
+    const id = `${LOCAL_PREFIX}${slug(draft.titulo) || "publicacao"}-${Date.now().toString(36)}`;
     if (!addLocalPost({ ...draft, id, imagens: undefined }, fotos)) {
       setErro("Não coube no navegador: tente com menos imagens no texto. (Na versão final, as fotos vão para o servidor.)");
       return;
