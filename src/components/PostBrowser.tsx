@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AREA, AREAS, FRENTES, isAreaKey, isFrenteKey, type AreaKey, type FrenteKey } from "@/lib/data";
 import { useAllPosts } from "@/lib/localPosts";
+import { semAcento, textoBusca } from "@/lib/search";
 import { PostRow } from "./PostRow";
 
 type FrenteFilter = FrenteKey | "todas";
@@ -29,12 +30,12 @@ export function PostBrowser() {
   }, [frente, areas, q]);
 
   const list = useMemo(() => {
-    const term = q.trim().toLowerCase();
+    const term = semAcento(q.trim());
     return all.filter(
       (p) =>
         (frente === "todas" || p.frente === frente) &&
         (!areas.size || p.areas.some((a) => areas.has(a))) &&
-        (!term || `${p.titulo} ${p.resumo}`.toLowerCase().includes(term)),
+        (!term || textoBusca(p).includes(term)),
     );
   }, [all, frente, areas, q]);
 
@@ -58,7 +59,7 @@ export function PostBrowser() {
             <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
             <path d="M15.5 15.5L21 21" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
           </svg>
-          <input type="search" placeholder="Buscar por título ou assunto" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input type="search" placeholder="Buscar por título, assunto ou trecho do texto" value={q} onChange={(e) => setQ(e.target.value)} />
         </label>
         <div className="chips" role="group" aria-label="Filtrar por frente">
           {chips.map(([k, n, c]) => (
