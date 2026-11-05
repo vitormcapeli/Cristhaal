@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "./Logo";
 import { NavLinks, NavLinksStatic } from "./NavLinks";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   return (
@@ -16,6 +17,7 @@ export function Header() {
             <NavLinks />
           </Suspense>
         </nav>
+        <ThemeToggle />
       </div>
     </header>
   );

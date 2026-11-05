@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { AREAS, COORDENACAO, INSTAGRAM } from "@/lib/data";
+import { InstagramIcon, YoutubeIcon } from "@/components/Icons";
+import { AREAS, COORDENACAO, INSTAGRAM, UNIFESP, YOUTUBE } from "@/lib/data";
 
 export const metadata: Metadata = { title: "Quem somos" };
 
@@ -54,6 +55,25 @@ export default function QuemSomos() {
         </aside>
       </div>
 
+      <section className="unifesp" id="unifesp" aria-labelledby="unifespTitle">
+        <a className="unifesp-plate" href={UNIFESP} target="_blank" rel="noopener" aria-label="Site da Unifesp">
+          {/* eslint-disable-next-line @next/next/no-img-element -- logo institucional fixo */}
+          <img src="/unifesp.png" alt="Unifesp, Universidade Federal de São Paulo" width={501} height={290} />
+        </a>
+        <div>
+          <h2 id="unifespTitle">Um projeto da Unifesp</h2>
+          <p>
+            O Cristhaal é um projeto de extensão universitária do Instituto de Ciência e Tecnologia (ICT) da Universidade Federal de São Paulo,
+            no campus São José dos Campos. Extensão é a parte da universidade que sai dos muros do campus: leva o que se pesquisa e se ensina
+            lá dentro para as escolas e para a comunidade, e traz a comunidade para conhecer a universidade por dentro.
+          </p>
+          <p>
+            É por isso que os encontros acontecem nos dois sentidos: a equipe vai até as escolas públicas da região, e os estudantes vêm até os
+            laboratórios do ICT. As três coordenadoras são professoras da Unifesp, e a equipe conta com bolsistas do projeto.
+          </p>
+        </div>
+      </section>
+
       <section className="sec objetivos" id="objetivos" aria-labelledby="objTitle">
         <div className="sec-head">
           <div>
@@ -71,16 +91,12 @@ export default function QuemSomos() {
       <section className="contato" id="contato" aria-labelledby="contatoTitle">
         <div>
           <h2 id="contatoTitle">Fale com a gente</h2>
-          <p>Escola, professor ou estudante com vontade de participar? A forma mais rápida de falar com o projeto é pelo Instagram. Mande uma mensagem direta.</p>
+          <p>Escola, professor ou estudante com vontade de participar? A forma mais rápida de falar com o projeto é por mensagem direta no Instagram. No YouTube ficam os vídeos dos encontros e das atividades.</p>
         </div>
-        <a className="btn primary insta" href={INSTAGRAM} target="_blank" rel="noopener">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2.2" />
-            <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2.2" />
-            <circle cx="17.4" cy="6.6" r="1.3" fill="currentColor" />
-          </svg>
-          @projetocristhaal
-        </a>
+        <div className="contato-links">
+          <a className="btn primary" href={INSTAGRAM} target="_blank" rel="noopener"><InstagramIcon />@projetocristhaal</a>
+          <a className="btn" href={YOUTUBE} target="_blank" rel="noopener"><YoutubeIcon />@CristhaalUnifesp</a>
+        </div>
       </section>
     </div>
   );

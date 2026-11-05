@@ -48,6 +48,8 @@ p { margin: 0 0 1em }
 .nav a[aria-current="page"] { color: var(--ink); background: var(--soft) }
 .nav a.cta { background: var(--ink); color: var(--paper); margin-left: 6px }
 .nav a.cta:hover { background: var(--ink); opacity: .88 }
+.theme-toggle { flex-shrink: 0; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--line) 30%, transparent); background: var(--surface); color: var(--ink); cursor: pointer; transition: transform .2s, border-color .2s }
+.theme-toggle:hover { border-color: var(--line); transform: rotate(-15deg) }
 
 /* Botões */
 .btn { display: inline-flex; align-items: center; gap: 8px; font: 700 1rem/1 var(--body); padding: 14px 22px; border-radius: var(--hand-sm); border: 2px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer; transition: transform .15s, box-shadow .15s }
@@ -217,7 +219,16 @@ a.row:hover { background: var(--soft) }
 .contato { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; margin-bottom: 72px; padding: clamp(24px, 4vw, 40px); border: 2px solid var(--line); border-radius: var(--hand); background: var(--soft) }
 .contato h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 10px }
 .contato p { margin: 0; color: var(--muted); max-width: 54ch }
-.btn.insta { font-size: 1.05rem }
+
+.contato-links { display: flex; flex-wrap: wrap; gap: 12px }
+.unifesp { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; padding-block: clamp(40px, 6vw, 72px); border-top: 1.5px solid color-mix(in srgb, var(--line) 14%, transparent) }
+.unifesp h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 800; margin-bottom: 14px }
+.unifesp p { color: var(--muted); max-width: 64ch }
+/* O logo da Unifesp tem fundo branco: fica sempre sobre uma placa clara, nos dois temas */
+.unifesp-plate { display: block; background: #ffffff; border: 2px solid var(--line); border-radius: var(--hand); padding: 20px 24px; transition: transform .15s, box-shadow .15s }
+.unifesp-plate:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--line) }
+.unifesp-plate img { display: block; width: 100%; height: auto }
+.unifesp-plate.small { width: 132px; padding: 10px 12px; border-radius: var(--hand-sm); flex-shrink: 0 }
 
 /* Galeria */
 .galeria { display: grid; gap: clamp(36px, 5vw, 56px); border-top: 2px solid var(--line); padding-top: 28px }
@@ -255,6 +266,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
 .foot-links { display: flex; gap: 18px; flex-wrap: wrap; font-weight: 700 }
 .foot-links a { text-decoration: none }
 .foot-links a:hover { text-decoration: underline }
+.foot-links .social { display: inline-flex; align-items: center; gap: 6px }
 
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: 999px; font-weight: 700; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; z-index: 70 }
 .toast.show { opacity: 1; transform: translate(-50%, 0) }
@@ -271,7 +283,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
   .hero { grid-template-columns: 1fr; min-height: 0; padding-top: 20px; text-align: left }
   .hero-stage { width: min(84vw, 440px); margin-bottom: 36px }
   .frentes { grid-template-columns: 1fr }
-  .about, .composer { grid-template-columns: 1fr }
+  .about, .composer, .unifesp { grid-template-columns: 1fr }
+  .unifesp-plate:not(.small) { max-width: 300px }
   .obj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .preview-box { position: static }
 }
@@ -279,6 +292,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
   .top .wrap { flex-wrap: wrap; gap: 4px; padding-block: 8px }
   .nav { width: 100%; margin-left: 0 }
   .brand .bt { display: none }
+  .theme-toggle { margin-left: auto; width: 38px; height: 38px }
+  .nav { order: 2 }
   .row { grid-template-columns: 84px minmax(0, 1fr); gap: 14px }
   .row .thumb { width: 84px; height: 68px }
   .photos { display: none }

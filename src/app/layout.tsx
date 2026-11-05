@@ -4,6 +4,7 @@ import { ViewTransition } from "react";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { ToastProvider } from "@/components/Toast";
+import { themeScript } from "@/lib/theme";
 import "./globals.css";
 
 const body = Atkinson_Hyperlegible({ variable: "--font-body", subsets: ["latin"], weight: ["400", "700"], style: ["normal", "italic"] });
@@ -20,7 +21,10 @@ export const viewport: Viewport = { viewportFit: "cover" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${body.variable} ${display.variable} ${script.variable}`}>
+    <html lang="pt-BR" className={`${body.variable} ${display.variable} ${script.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <noscript><style>{".logo.pre{visibility:visible}"}</style></noscript>
         <ToastProvider>

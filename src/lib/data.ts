@@ -67,15 +67,17 @@ export const AUTHORS: Record<AutorKey, { nome: string; papel: string; ini: strin
   coord: { nome: "Coordenação", papel: "Professoras do projeto", ini: "CO", c: "#E6197F" },
 };
 
-// TODO: preencher com os nomes reais (a professora autorizou exibir os nomes na página Quem somos).
-// `foto` aceita um caminho dentro de /public, por exemplo "/coordenacao/nome.jpg".
+// Coordenadoras (nomes autorizados pela professora para a página Quem somos).
+// `foto` aceita um caminho dentro de /public, por exemplo "/coordenacao/ana.jpg".
 export const COORDENACAO: { nome: string; area: string; ini: string; c: string; foto?: string }[] = [
-  { nome: "Nome da professora", area: "Área de atuação", ini: "P1", c: "#E6197F" },
-  { nome: "Nome da professora", area: "Área de atuação", ini: "P2", c: "#2E6FD8" },
-  { nome: "Nome da professora", area: "Área de atuação", ini: "P3", c: "#F28C28" },
+  { nome: "Ana Maria do Espírito Santo Slapnik", area: "Professora Adjunta de Física / Ciências dos Materiais", ini: "AM", c: "#2E6FD8" },
+  { nome: "Cláudia Aline Azevedo dos Santos Mesquita", area: "Professora Adjunta de Matemática", ini: "CA", c: "#E6197F" },
+  { nome: "Silvia Lucia Cuffini", area: "Professora Adjunta de Química / Ciências Químicas e de Materiais", ini: "SL", c: "#F28C28" },
 ];
 
 export const INSTAGRAM = "https://www.instagram.com/projetocristhaal/";
+export const YOUTUBE = "https://www.youtube.com/@CristhaalUnifesp";
+export const UNIFESP = "https://www.unifesp.br";
 
 // Publicações de exemplo, aprovadas no protótipo. Trocar pelos relatos reais.
 export const POSTS: Post[] = [
