@@ -32,7 +32,7 @@ Abra http://localhost:3000.
 | `/publicacoes/[id]` | Publicação com capa, texto, galeria e navegação para a anterior e a próxima |
 | `/galeria` | Todas as fotos das publicações, agrupadas por encontro |
 | `/quem-somos` | História do projeto, Programa Decolar, coordenação, objetivos e contato (Instagram) |
-| `/publicar` | Formulário de nova publicação com prévia ao vivo |
+| `/publicar` | Editor de nova publicação, no formato da página final. Não aparece no menu nem no Google: a equipe acessa pelo endereço direto |
 
 ## Onde mexer
 
@@ -46,7 +46,7 @@ Abra http://localhost:3000.
 O visual foi aprovado a partir do protótipo e ainda não existe backend:
 
 - As publicações são exemplos fixos em `src/lib/data.ts`.
-- O que for publicado em `/publicar` fica salvo **só no navegador** de quem testou (`localStorage`), e as fotos escolhidas valem só até fechar a aba.
+- O que for publicado em `/publicar` fica salvo **só no navegador** de quem testou (`localStorage`), com id começando por `teste-`, e as fotos escolhidas valem só até fechar a aba. Qualquer outro endereço de publicação que não exista mostra a página 404.
 - O logo é uma releitura vetorial feita a partir de uma imagem. Com o arquivo original (SVG, AI ou PDF) dá para deixá-lo idêntico.
 
 ## Próximos passos

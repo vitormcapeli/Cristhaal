@@ -8,14 +8,14 @@ const LINKS = [
   { href: "/publicacoes", label: "Publicações" },
   { href: "/galeria", label: "Galeria" },
   { href: "/quem-somos", label: "Quem somos" },
-  { href: "/publicar", label: "Nova publicação", cta: true },
 ];
+// /publicar fica fora do menu: só a equipe publica e acessa pelo endereço direto (depois, pelo login).
 
 function Links({ path }: { path: string | null }) {
   return LINKS.map((l) => {
     const on = path !== null && (l.href === "/" ? path === "/" : path.startsWith(l.href));
     return (
-      <Link key={l.href} href={l.href} className={l.cta ? "cta" : undefined} aria-current={on ? "page" : undefined}>
+      <Link key={l.href} href={l.href} aria-current={on ? "page" : undefined}>
         {l.label}
       </Link>
     );

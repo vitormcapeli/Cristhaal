@@ -154,6 +154,9 @@ export const POSTS: Post[] = [
   },
 ];
 
+/** Prefixo das publicações de teste salvas só no navegador (ver localPosts.ts). Qualquer outro id desconhecido é 404. */
+export const LOCAL_PREFIX = "teste-";
+
 export const sortPosts = (list: Post[]) => [...list].sort((a, b) => b.data.localeCompare(a.data));
 export const getPost = (id: string) => POSTS.find((p) => p.id === id);
 

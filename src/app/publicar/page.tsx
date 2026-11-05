@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Composer } from "@/components/Composer";
 
-export const metadata: Metadata = { title: "Nova publicação" };
+export const metadata: Metadata = { title: "Nova publicação", robots: { index: false, follow: false } };
 
 export default function Publicar() {
   return (
