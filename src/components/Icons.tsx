@@ -35,3 +35,49 @@ export function MoonIcon({ size = 20 }: P) {
     </svg>
   );
 }
+
+const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
+export function ListIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 6h11M9 12h11M9 18h11" {...stroke} />
+      <circle cx="4.5" cy="6" r="1.5" fill="currentColor" /><circle cx="4.5" cy="12" r="1.5" fill="currentColor" /><circle cx="4.5" cy="18" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function PhotoIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4.5" width="18" height="15" rx="3" {...stroke} />
+      <circle cx="9" cy="10" r="1.8" fill="currentColor" />
+      <path d="M4 18l5.5-5 4 3.5 2.5-2 4 3.5" {...stroke} />
+    </svg>
+  );
+}
+
+export function UndoIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 7 4.5 11.5 9 16M5 11.5h9.5a5 5 0 0 1 0 10H12" {...stroke} />
+    </svg>
+  );
+}
+
+export function RedoIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ transform: "scaleX(-1)" }}>
+      <path d="M9 7 4.5 11.5 9 16M5 11.5h9.5a5 5 0 0 1 0 10H12" {...stroke} />
+    </svg>
+  );
+}
+
+export function StepsIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="5" cy="6" r="2.2" {...stroke} /><circle cx="5" cy="18" r="2.2" {...stroke} />
+      <path d="M10 6h10M10 18h10M5 8.5v7" {...stroke} />
+    </svg>
+  );
+}

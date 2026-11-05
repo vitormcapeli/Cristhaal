@@ -3,7 +3,7 @@ import { ViewTransition } from "react";
 import { FRENTES, fmtDate, type Post } from "@/lib/data";
 import { CrystalArt } from "./CrystalArt";
 import { AreaLetters, Author, FrenteTag, thumbName } from "./PostRow";
-import { Steps } from "./Steps";
+import { PostBody } from "./RichText";
 
 /** Fotos que aparecem por publicação no feed da página inicial; o resto fica na página do post. */
 const FEED_PHOTOS = 4;
@@ -44,9 +44,7 @@ export function PostArticle({ post: p, inFeed }: ArticleProps) {
       <div className="cover">
         <ViewTransition name={thumbName(p.id)} share="morph" default="none">{cover}</ViewTransition>
       </div>
-      <div className="prose">
-        {p.corpo.map((b, i) => ("steps" in b ? <Steps key={i} color={F.c} /> : <p key={i}>{b.p}</p>))}
-      </div>
+      <PostBody corpo={p.corpo} color={F.c} inFeed={inFeed} />
       {nf > 0 && (
         <>
           {inFeed ? <h4 className="gallery-title">Fotos do encontro</h4> : <h2 className="gallery-title">Fotos do encontro</h2>}

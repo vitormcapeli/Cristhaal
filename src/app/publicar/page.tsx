@@ -5,10 +5,13 @@ export const metadata: Metadata = { title: "Nova publicação" };
 
 export default function Publicar() {
   return (
-    <div className="wrap">
-      <div className="page-head">
+    <div className="wrap post compose">
+      <div className="compose-head">
         <h1>Nova publicação</h1>
-        <p>Área da equipe. Por enquanto, o que você publicar fica salvo só neste navegador, para testar como o fluxo vai funcionar.</p>
+        <p>
+          Escreva direto na página: ela já está do jeito que vai aparecer no portal. Clique na frente, no título, nas letras
+          das áreas ou no texto para mudar. O rascunho fica salvo neste navegador.
+        </p>
       </div>
       <Composer />
     </div>

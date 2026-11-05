@@ -7,7 +7,8 @@ export type AutorKey = "equipe" | "coord";
 
 export type Area = { k: AreaKey; l: string; n: string; c: string; rest: string };
 export type Frente = { nome: string; full: string; c: string; seed: number; text?: string };
-export type Bloco = { p: string } | { steps: true };
+/** Blocos do texto. Em `p` e `ul`, `**negrito**` e `*itálico*` (com `\` para escapar). */
+export type Bloco = { p: string } | { h: string } | { ul: string[] } | { steps: true };
 
 export type Post = {
   id: string;
