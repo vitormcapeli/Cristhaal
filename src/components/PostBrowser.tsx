@@ -1,33 +1,65 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AREA, AREAS, FRENTES, isAreaKey, isFrenteKey, type AreaKey, type FrenteKey } from "@/lib/data";
 import { useAllPosts } from "@/lib/localPosts";
 import { semAcento, textoBusca } from "@/lib/search";
 import { PostRow } from "./PostRow";
 
 type FrenteFilter = FrenteKey | "todas";
+type Params = { get(k: string): string | null; getAll(k: string): string[] };
+
+const lerFrente = (p: Params): FrenteFilter => {
+  const f = p.get("frente");
+  return f && isFrenteKey(f) ? f : "todas";
+};
+const lerAreas = (p: Params) => new Set(p.getAll("area").filter(isAreaKey));
+
+/** Os filtros como query da URL, sempre na mesma ordem. */
+function paraQuery(frente: FrenteFilter, areas: Set<AreaKey>, q: string) {
+  const u = new URLSearchParams();
+  if (frente !== "todas") u.set("frente", frente);
+  areas.forEach((a) => u.append("area", a));
+  if (q.trim()) u.set("q", q.trim());
+  return u.toString();
+}
 
 /** Lista de publicações com busca, filtro por frente e pelas letras de CRISTHAAL. Os filtros ficam na URL. */
 export function PostBrowser() {
   const params = useSearchParams();
-  const [frente, setFrente] = useState<FrenteFilter>(() => {
-    const f = params.get("frente");
-    return f && isFrenteKey(f) ? f : "todas";
-  });
-  const [areas, setAreas] = useState<Set<AreaKey>>(() => new Set(params.getAll("area").filter(isAreaKey)));
+  const urlKey = params.toString();
+  const [frente, setFrente] = useState<FrenteFilter>(() => lerFrente(params));
+  const [areas, setAreas] = useState<Set<AreaKey>>(() => lerAreas(params));
   const [q, setQ] = useState(() => params.get("q") ?? "");
   const all = useAllPosts();
 
+  // Queries que este componente escreveu na URL e que o Next ainda não devolveu em `params`.
+  // Uma query fora dessa fila veio de fora (link do menu, link de uma letra, Voltar/Avançar).
+  const escrito = useRef(urlKey);
+  const pendentes = useRef<string[]>([]);
+  const visto = useRef(urlKey);
+  const stateKey = paraQuery(frente, areas, q);
+
   useEffect(() => {
-    const u = new URLSearchParams();
-    if (frente !== "todas") u.set("frente", frente);
-    areas.forEach((a) => u.append("area", a));
-    if (q.trim()) u.set("q", q.trim());
-    const s = u.toString();
-    window.history.replaceState(null, "", s ? `?${s}` : window.location.pathname);
-  }, [frente, areas, q]);
+    if (stateKey === escrito.current) return;
+    escrito.current = stateKey;
+    pendentes.current.push(stateKey);
+    window.history.replaceState(null, "", stateKey ? `?${stateKey}` : window.location.pathname);
+  }, [stateKey]);
+
+  useEffect(() => {
+    if (urlKey === visto.current) return;
+    visto.current = urlKey;
+    const i = pendentes.current.indexOf(urlKey);
+    if (i >= 0) { pendentes.current.splice(0, i + 1); return; }
+    // Navegação externa: os filtros passam a seguir a URL.
+    pendentes.current = [];
+    escrito.current = urlKey;
+    setFrente(lerFrente(params));
+    setAreas(lerAreas(params));
+    setQ(params.get("q") ?? "");
+  }, [urlKey, params]);
 
   const list = useMemo(() => {
     const term = semAcento(q.trim());
