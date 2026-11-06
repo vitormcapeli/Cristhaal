@@ -29,9 +29,8 @@ export function PostAdmin({ id, titulo }: { id: string; titulo: string }) {
       return;
     }
     await apagarImagens(sb, id).catch(() => {});
-    await postsMudaram(session.access_token);
     toast("Publicação apagada");
-    router.push("/publicacoes");
+    if ((await postsMudaram(session.access_token, "/publicacoes")) === false) router.push("/publicacoes");
   };
 
   return (

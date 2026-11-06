@@ -599,6 +599,7 @@ export function Composer() {
     setEnviando(true);
     const sb = supabaseNavegador();
     const enviados: string[] = [];
+    let pronto: { token: string; id: string };
     try {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) throw new Error("sessao");
@@ -616,11 +617,7 @@ export function Composer() {
       );
       const { error } = await sb.from("posts").insert(postToRow({ ...draft, id, corpo: corpoFinal, imagens }));
       if (error) throw error;
-      await postsMudaram(session.access_token);
-      publicado.current = true;
-      try { localStorage.removeItem(DRAFT_KEY); } catch {}
-      toast("Publicação publicada");
-      router.push(`/publicacoes/${id}`);
+      pronto = { token: session.access_token, id };
     } catch (e) {
       if (enviados.length) await sb.storage.from(BUCKET).remove(enviados).catch(() => {});
       const msg = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
@@ -631,7 +628,15 @@ export function Composer() {
         : `Não foi possível publicar: ${msg}`,
       );
       setEnviando(false);
+      return;
     }
+    publicado.current = true;
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    toast("Publicação publicada");
+    // Fora do try: o servidor renova o cache e redireciona para o post novo (o redirecionamento chega
+    // aqui como uma exceção que o Next trata). Se a sessão não for aceita, abre o post do mesmo jeito.
+    const destino = `/publicacoes/${pronto.id}`;
+    if ((await postsMudaram(pronto.token, destino)) === false) router.push(destino);
   };
 
   const descartar = () => {
