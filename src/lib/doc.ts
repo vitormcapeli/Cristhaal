@@ -138,7 +138,8 @@ function blocos(nodes: unknown, nivel: number, so?: Set<string>): No[] {
       }
       case "heading": {
         const c = inline(n.content);
-        if (c.length) out.push({ type: "heading", attrs: { level: Number(a?.level) >= 3 ? 3 : 2, ...alinhamento(a) }, content: c });
+        // Um só nível de subtítulo no portal.
+        if (c.length) out.push({ type: "heading", attrs: { level: 2, ...alinhamento(a) }, content: c });
         break;
       }
       case "bulletList":
