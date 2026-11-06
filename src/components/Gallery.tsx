@@ -1,14 +1,11 @@
-"use client";
-
 import Link from "next/link";
-import { FRENTES, fmtDate } from "@/lib/data";
-import { useAllPosts } from "@/lib/localPosts";
+import { FRENTES, fmtDate, type Post } from "@/lib/data";
 import { CrystalArt } from "./CrystalArt";
 import { FrenteTag } from "./PostRow";
 
 /** Todas as fotos das publicações, agrupadas pelo encontro de onde vieram (mais recentes primeiro). */
-export function Gallery() {
-  const posts = useAllPosts().filter((p) => (p.imagens?.length || p.fotos) > 0);
+export function Gallery({ posts: all }: { posts: Post[] }) {
+  const posts = all.filter((p) => (p.imagens?.length || p.fotos) > 0);
   const total = posts.reduce((n, p) => n + (p.imagens?.length || p.fotos), 0);
   return (
     <>

@@ -3,6 +3,7 @@ import { ViewTransition } from "react";
 import { FRENTES, fmtDate, type Post } from "@/lib/data";
 import { CrystalArt } from "./CrystalArt";
 import { AreaLetters, Author, FrenteTag, thumbName } from "./PostRow";
+import { PostAdmin } from "./PostAdmin";
 import { PostBody } from "./RichText";
 import { validW } from "@/lib/rich";
 
@@ -85,21 +86,12 @@ export function PostView({ post, prev, next }: Props) {
   return (
     <div className="wrap post">
       <Link className="back" href="/publicacoes">Voltar para publicações</Link>
+      <PostAdmin id={post.id} titulo={post.titulo} />
       <PostArticle post={post} />
       <nav className="pn" aria-label="Outras publicações">
         {prev ? <Link href={`/publicacoes/${prev.id}`}><small>Anterior</small><b>{prev.titulo}</b></Link> : <span />}
         {next ? <Link className="next" href={`/publicacoes/${next.id}`}><small>Próxima</small><b>{next.titulo}</b></Link> : <span />}
       </nav>
-    </div>
-  );
-}
-
-export function PostNotFound() {
-  return (
-    <div className="wrap post">
-      <Link className="back" href="/publicacoes">Voltar para publicações</Link>
-      <h1>Esta publicação não existe mais.</h1>
-      <p>Ela pode ter sido removida. Veja as outras na lista de publicações.</p>
     </div>
   );
 }

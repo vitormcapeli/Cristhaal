@@ -1,26 +1,24 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LocalPost } from "@/components/LocalPost";
 import { PostView } from "@/components/PostView";
-import { LOCAL_PREFIX, POSTS, getPost, sortPosts } from "@/lib/data";
+import { getPosts } from "@/lib/posts";
 
-export function generateStaticParams() {
-  return POSTS.map((p) => ({ id: p.id }));
+export async function generateStaticParams() {
+  const posts = await getPosts();
+  // Com Cache Components a lista não pode vir vazia; um id que não existe vira 404.
+  return posts.length ? posts.map((p) => ({ id: p.id })) : [{ id: "_" }];
 }
 
 export async function generateMetadata({ params }: PageProps<"/publicacoes/[id]">): Promise<Metadata> {
-  const p = getPost((await params).id);
-  return p ? { title: p.titulo, description: p.resumo } : { title: "Publicação" };
+  const { id } = await params;
+  const p = (await getPosts()).find((x) => x.id === id);
+  return p ? { title: p.titulo, description: p.resumo } : { title: "Publicação não encontrada" };
 }
 
 export default async function PostPage({ params }: PageProps<"/publicacoes/[id]">) {
   const { id } = await params;
-  const list = sortPosts(POSTS);
+  const list = await getPosts();
   const i = list.findIndex((p) => p.id === id);
-  if (i < 0) {
-    // Publicação de teste salva só no navegador de quem escreveu. Qualquer outro id não existe.
-    if (id.startsWith(LOCAL_PREFIX)) return <LocalPost id={id} />;
-    notFound();
-  }
+  if (i < 0) notFound();
   return <PostView post={list[i]} prev={list[i + 1]} next={list[i - 1]} />;
 }

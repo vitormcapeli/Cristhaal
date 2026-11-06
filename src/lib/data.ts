@@ -1,5 +1,5 @@
-// Conteúdo do portal. Enquanto não existe backend, tudo o que aparece no site vem daqui.
-// Quando o Supabase entrar, POSTS passa a vir do banco e este arquivo fica só com as constantes.
+// Constantes do portal (áreas, frentes, autores, coordenação e links) e os tipos das publicações.
+// As publicações vêm do Supabase (src/lib/posts.ts); as de exemplo estão em supabase/exemplos.sql.
 
 export type AreaKey = "C" | "R" | "I" | "S" | "T" | "H" | "A1" | "A2" | "L";
 export type FrenteKey = "educa" | "experimenta" | "inspira" | "geral";
@@ -93,72 +93,6 @@ export const COORDENACAO: { nome: string; area: string; ini: string; c: string; 
 export const INSTAGRAM = "https://www.instagram.com/projetocristhaal/";
 export const YOUTUBE = "https://www.youtube.com/@CristhaalUnifesp";
 export const UNIFESP = "https://www.unifesp.br";
-
-// Publicações de exemplo, aprovadas no protótipo. Trocar pelos relatos reais.
-export const POSTS: Post[] = [
-  {
-    id: "cristais-coloridos", frente: "experimenta", areas: ["C", "R", "A2"], autor: "equipe", data: "2026-10-14", fotos: 6, seed: 401,
-    titulo: "Cristais azuis e vermelhos: estudantes cultivam os próprios cristais no ICT",
-    resumo: "No laboratório, cada estudante preparou a solução, colocou o fio-semente e acompanhou o cristal crescer dia após dia.",
-    corpo: [
-      { p: "Nesta edição do Cristhaal Experimenta, os estudantes entraram no laboratório da Unifesp em São José dos Campos para viver um experimento de cristalização do começo ao fim." },
-      { p: "O processo seguiu quatro etapas:" },
-      { steps: true },
-      { p: "O resultado foram cristais azuis, vermelhos e de outras cores, cada um com um formato diferente. Mais do que o cristal em si, o que ficou foi a emoção de ver a ciência acontecer com as próprias mãos." },
-    ],
-  },
-  {
-    id: "decolar-no-ict", frente: "educa", areas: ["C", "R", "S", "I"], autor: "coord", data: "2026-10-02", fotos: 8, seed: 517,
-    titulo: "Programa Decolar no ICT: um dia dentro dos laboratórios",
-    resumo: "Estudantes do Programa Decolar conheceram laboratórios de pesquisa e participaram de seminários de matemática, física, química e biologia.",
-    corpo: [
-      { p: "Recebemos estudantes do Programa Decolar para um dia inteiro no Instituto de Ciência e Tecnologia. A programação incluiu visitas a laboratórios e seminários pensados especialmente para eles." },
-      { p: "Ao longo do dia, os estudantes conversaram com pesquisadores e fizeram perguntas que surpreenderam muita gente da casa. A ideia é que eles enxerguem a universidade como um lugar possível para o futuro deles." },
-    ],
-  },
-  {
-    id: "sonia-guimaraes", frente: "inspira", areas: ["C", "H", "S"], autor: "equipe", data: "2026-09-25", fotos: 2, seed: 263,
-    titulo: "Sonia Guimarães e a física feita aqui do lado",
-    resumo: "Primeira mulher negra brasileira doutora em física e professora do ITA, em São José dos Campos.",
-    corpo: [
-      { p: "Abrimos a série do Cristhaal Inspira com uma cientista que trabalha bem perto de nós. Sonia Guimarães é a primeira mulher negra brasileira com doutorado em física e é professora do ITA, aqui em São José dos Campos." },
-      { p: "Contar a trajetória dela para os estudantes é mostrar que a ciência também tem rostos parecidos com os deles. Representatividade importa." },
-    ],
-  },
-  {
-    id: "cristais-no-cotidiano", frente: "educa", areas: ["C", "T", "L"], autor: "equipe", data: "2026-09-18", fotos: 4, seed: 88,
-    titulo: "Do sal de cozinha ao chip do celular: tem cristal em tudo",
-    resumo: "Uma aula numa escola pública da região sobre os cristais escondidos no dia a dia.",
-    corpo: [
-      { p: "Levamos lupas, amostras e muitas perguntas para uma turma de escola pública da região. O desafio era encontrar cristais em objetos comuns." },
-      { p: "Sal, açúcar, gelo, a tela e o processador do celular: no fim da aula, a turma já estava vendo cristal em todo canto." },
-    ],
-  },
-  {
-    id: "enedina-alves-marques", frente: "inspira", areas: ["T", "H", "S"], autor: "equipe", data: "2026-09-11", fotos: 3, seed: 331,
-    titulo: "Enedina Alves Marques, a primeira engenheira negra do Brasil",
-    resumo: "Formada em engenharia civil no Paraná em 1945, abriu caminho para muitas outras.",
-    corpo: [
-      { p: "Enedina Alves Marques se formou em engenharia civil no Paraná, em 1945, e se tornou a primeira mulher negra engenheira do país." },
-      { p: "Neste post, a equipe conta como foi a conversa com os estudantes sobre a trajetória dela e sobre o que ainda falta para a engenharia ser um lugar de todas e todos." },
-    ],
-  },
-  {
-    id: "prazer-cristhaal", frente: "geral", areas: ["R", "I", "A1", "A2", "L"], autor: "coord", data: "2026-09-04", fotos: 5, seed: 742,
-    titulo: "Prazer, Cristhaal: de uma conversa entre professoras a um projeto",
-    resumo: "Como três professoras de áreas diferentes transformaram uma conversa sobre cristais num projeto de extensão.",
-    corpo: [
-      { p: "O Cristhaal nasceu de uma conversa descontraída entre três professoras de áreas totalmente diferentes. O assunto era a presença dos cristais no cotidiano, enorme e quase invisível." },
-      { p: "Daí surgiu a vontade de mostrar a importância dos cristais na ciência, na tecnologia, na matemática, na história, na filosofia, na arquitetura e na arte. Vamos explorar o lado lúdico dos cristais além da sua forma visível." },
-    ],
-  },
-];
-
-/** Prefixo das publicações de teste salvas só no navegador (ver localPosts.ts). Qualquer outro id desconhecido é 404. */
-export const LOCAL_PREFIX = "teste-";
-
-export const sortPosts = (list: Post[]) => [...list].sort((a, b) => b.data.localeCompare(a.data));
-export const getPost = (id: string) => POSTS.find((p) => p.id === id);
 
 export const fmtDate = (d: string) =>
   new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" });

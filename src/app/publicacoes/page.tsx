@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PostBrowser } from "@/components/PostBrowser";
+import { getPosts } from "@/lib/posts";
 
 export const metadata: Metadata = { title: "Publicações" };
+
+async function Lista() {
+  return <PostBrowser posts={await getPosts()} />;
+}
 
 export default function Publicacoes() {
   return (
@@ -12,7 +17,7 @@ export default function Publicacoes() {
         <p>Tudo o que aconteceu nos encontros do projeto. Filtre pela frente ou pelas letras de Cristhaal.</p>
       </div>
       <Suspense fallback={<div className="count">Carregando publicações…</div>}>
-        <PostBrowser />
+        <Lista />
       </Suspense>
       <div style={{ height: 72 }} />
     </div>

@@ -2,8 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AREA, AREAS, FRENTES, isAreaKey, isFrenteKey, type AreaKey, type FrenteKey } from "@/lib/data";
-import { useAllPosts } from "@/lib/localPosts";
+import { AREA, AREAS, FRENTES, isAreaKey, isFrenteKey, type AreaKey, type FrenteKey, type Post } from "@/lib/data";
 import { semAcento, textoBusca } from "@/lib/search";
 import { PostRow } from "./PostRow";
 
@@ -28,13 +27,12 @@ function paraQuery(frente: FrenteFilter, areas: Set<AreaKey>, q: string) {
 }
 
 /** Lista de publicações com busca, filtro por frente e pelas letras de CRISTHAAL. Os filtros ficam na URL. */
-export function PostBrowser() {
+export function PostBrowser({ posts: all }: { posts: Post[] }) {
   const params = useSearchParams();
   const urlKey = params.toString();
   const [frente, setFrente] = useState<FrenteFilter>(() => lerFrente(params));
   const [areas, setAreas] = useState<Set<AreaKey>>(() => lerAreas(params));
   const [q, setQ] = useState(() => params.get("q") ?? "");
-  const all = useAllPosts();
   // O campo de busca não é controlado: o que a pessoa digita nunca é sobrescrito por uma renderização atrasada.
   const inputRef = useRef<HTMLInputElement>(null);
 

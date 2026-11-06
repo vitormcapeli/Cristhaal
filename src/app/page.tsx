@@ -4,9 +4,14 @@ import { LatestFeed } from "@/components/Feeds";
 import { HeroLogo } from "@/components/HeroLogo";
 import { Steps } from "@/components/Steps";
 import { AREA, FRENTES, type AreaKey, type FrenteKey } from "@/lib/data";
+import { getPosts } from "@/lib/posts";
 
 // "Ciência para o Reencontro Interdisciplinar da Sociedade com a Tecnologia, a História, o Ambiente e a Arte nas suas Linguagens."
 const SIGLA: (string | AreaKey)[] = ["C", " para o ", "R", " ", "I", " da ", "S", " com a ", "T", ", a ", "H", ", o ", "A1", " e a ", "A2", " nas suas ", "L", "."];
+
+async function Ultimas() {
+  return <LatestFeed posts={await getPosts()} />;
+}
 
 export default function Home() {
   return (
@@ -83,7 +88,7 @@ export default function Home() {
             </div>
             <Link className="btn small" href="/publicacoes">Ver todas</Link>
           </div>
-          <LatestFeed />
+          <Ultimas />
         </div>
       </section>
     </>

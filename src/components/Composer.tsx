@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  AREAS, FRENTES, LOCAL_PREFIX, fmtDate, isAlinhamento, isAreaKey, isFrenteKey,
+  AREAS, FRENTES, fmtDate, isAlinhamento, isAreaKey, isFrenteKey,
   type Alinhamento, type AreaKey, type Bloco, type FrenteKey, type Post,
 } from "@/lib/data";
 import { blocksToHtml, EMPTY_P, imageToDataUrl, imgHtml, inlineHtml, serialize, stepsHtml } from "@/lib/editor";
-import { addLocalPost } from "@/lib/localPosts";
+import { postsMudaram } from "@/app/actions";
+import { BUCKET, postToRow, supabaseNavegador } from "@/lib/supabase";
+import { enviarImagem } from "@/lib/upload";
 import { plainText, validW, W_MIN } from "@/lib/rich";
 import { CrystalArt } from "./CrystalArt";
 import { GripIcon, ListIcon, PhotoIcon, RedoIcon, StepsIcon, UndoIcon } from "./Icons";
@@ -210,7 +212,7 @@ function BlockControls({ a, rotulo, redimensionando, menuAberto, onResize, onRes
 /**
  * Editor de publicação. A página de edição é a própria publicação: o mesmo título, a mesma capa,
  * o mesmo texto e a mesma galeria da página do post. Escreve-se direto nela, como num editor de texto.
- * Por enquanto salva só no navegador (rascunho e publicação).
+ * O rascunho fica no navegador; ao publicar, as fotos vão para o Storage e o post para o banco.
  */
 export function Composer() {
   const router = useRouter();
@@ -230,6 +232,7 @@ export function Composer() {
   const [rotulo, setRotulo] = useState<string | null>(null);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
   const [salvo, setSalvo] = useState<"" | "salvo" | "cheio">("");
   const [pronto, setPronto] = useState(false);
   // A data de hoje só é lida no navegador (no servidor a página é pré-renderizada uma vez só).
@@ -587,19 +590,48 @@ export function Composer() {
     corpo, imagens: fotos,
   };
 
-  const publicar = () => {
+  const publicar = async () => {
+    if (enviando) return;
     if (!draft.titulo) { setErro("Falta o título da publicação."); titleRef.current?.focus(); return; }
     if (!corpo.length) { setErro("Falta o texto da publicação."); focusEditor(); return; }
     if (!areas.length) { setErro("Escolha pelo menos uma área (as letras ao lado da data)."); return; }
-    const id = `${LOCAL_PREFIX}${slug(draft.titulo) || "publicacao"}-${Date.now().toString(36)}`;
-    if (!addLocalPost({ ...draft, id, imagens: undefined }, fotos)) {
-      setErro("Não coube no navegador: tente com menos imagens no texto. (Na versão final, as fotos vão para o servidor.)");
-      return;
+    setErro("");
+    setEnviando(true);
+    const sb = supabaseNavegador();
+    const enviados: string[] = [];
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) throw new Error("sessao");
+      const id = `${slug(draft.titulo) || "publicacao"}-${Date.now().toString(36)}`;
+      const subir = async (src: string, nome: string) => {
+        const caminho = `${id}/${nome}.jpg`;
+        const url = await enviarImagem(sb, caminho, src);
+        enviados.push(caminho);
+        return url;
+      };
+      const imagens = await Promise.all(fotos.map((u, k) => subir(u, `foto-${k + 1}`)));
+      let n = 0;
+      const corpoFinal = await Promise.all(
+        corpo.map(async (b) => ("img" in b && b.img.startsWith("data:") ? { ...b, img: await subir(b.img, `texto-${++n}`) } : b)),
+      );
+      const { error } = await sb.from("posts").insert(postToRow({ ...draft, id, corpo: corpoFinal, imagens }));
+      if (error) throw error;
+      await postsMudaram(session.access_token);
+      publicado.current = true;
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      toast("Publicação publicada");
+      router.push(`/publicacoes/${id}`);
+    } catch (e) {
+      if (enviados.length) await sb.storage.from(BUCKET).remove(enviados).catch(() => {});
+      const msg = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
+      setErro(
+        msg === "sessao" ? "Sua sessão terminou. Recarregue a página e entre de novo (o rascunho continua salvo)."
+        : /row-level security|permission|unauthorized|jwt/i.test(msg) ? "Sua conta não tem permissão para publicar."
+        : /fetch|network/i.test(msg) ? "Sem conexão com o servidor. Confira a internet e tente de novo."
+        : `Não foi possível publicar: ${msg}`,
+      );
+      setEnviando(false);
     }
-    publicado.current = true;
-    try { localStorage.removeItem(DRAFT_KEY); } catch {}
-    toast("Publicação publicada");
-    router.push(`/publicacoes/${id}`);
   };
 
   const descartar = () => {
@@ -656,7 +688,7 @@ export function Composer() {
             {salvo === "salvo" ? "Rascunho salvo" : salvo === "cheio" ? "Rascunho grande demais para salvar" : ""}
           </span>
           {temAlgo && <button className="tb" type="button" onClick={descartar}>Descartar</button>}
-          <button className="btn primary small" type="button" onClick={publicar}>Publicar</button>
+          <button className="btn primary small" type="button" onClick={publicar} disabled={enviando}>{enviando ? "Publicando…" : "Publicar"}</button>
         </div>
       </div>
       <p className="form-error compose-error" role="alert">{erro}</p>

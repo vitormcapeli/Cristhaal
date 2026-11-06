@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Gallery } from "@/components/Gallery";
+import { getPosts } from "@/lib/posts";
 
 export const metadata: Metadata = { title: "Galeria" };
+
+async function Fotos() {
+  return <Gallery posts={await getPosts()} />;
+}
 
 export default function Galeria() {
   return (
@@ -10,7 +15,7 @@ export default function Galeria() {
         <h1>Galeria</h1>
         <p>As fotos de todos os encontros, juntas. Toque numa foto para ler a publicação de onde ela veio.</p>
       </div>
-      <Gallery />
+      <Fotos />
       <div style={{ height: 72 }} />
     </div>
   );

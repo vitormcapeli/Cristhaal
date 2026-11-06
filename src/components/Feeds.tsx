@@ -1,12 +1,9 @@
-"use client";
-
 import Link from "next/link";
-import { useAllPosts } from "@/lib/localPosts";
+import type { Post } from "@/lib/data";
 import { PostArticle } from "./PostView";
 
 /** Feed da página inicial: as publicações mais recentes já abertas, uma embaixo da outra. */
-export function LatestFeed({ count = 3 }: { count?: number }) {
-  const all = useAllPosts();
+export function LatestFeed({ posts: all, count = 3 }: { posts: Post[]; count?: number }) {
   const posts = all.slice(0, count);
   const older = all.length - posts.length;
   return (

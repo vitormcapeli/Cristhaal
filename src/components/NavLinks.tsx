@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useConectado } from "@/lib/sessao";
 
 const LINKS = [
   { href: "/", label: "Início" },
@@ -9,7 +10,8 @@ const LINKS = [
   { href: "/galeria", label: "Galeria" },
   { href: "/quem-somos", label: "Quem somos" },
 ];
-// /publicar fica fora do menu: só a equipe publica e acessa pelo endereço direto (depois, pelo login).
+// "Nova publicação" só aparece para quem entrou com a conta da equipe neste navegador.
+// Para entrar, a equipe abre /publicar pelo endereço direto.
 
 function Links({ path }: { path: string | null }) {
   return LINKS.map((l) => {
@@ -23,7 +25,16 @@ function Links({ path }: { path: string | null }) {
 }
 
 export function NavLinks() {
-  return <Links path={usePathname()} />;
+  const path = usePathname();
+  const conectado = useConectado();
+  return (
+    <>
+      <Links path={path} />
+      {conectado && (
+        <Link className="cta" href="/publicar" aria-current={path === "/publicar" ? "page" : undefined}>Nova publicação</Link>
+      )}
+    </>
+  );
 }
 
 /** Mesmos links sem marcar a página atual, usados enquanto o caminho ainda não é conhecido. */
