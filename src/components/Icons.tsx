@@ -89,3 +89,101 @@ export function GripIcon({ size = 18 }: P) {
     </svg>
   );
 }
+
+export function OrderedListIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 6h10M10 12h10M10 18h10" {...stroke} />
+      <path d="M4 4.5 5.5 4v4.5M3.8 14.2a1.5 1.5 0 1 1 2.4 1.6L3.8 19h2.7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function QuoteIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5v14" {...stroke} />
+      <path d="M9 8h11M9 12h11M9 16h7" {...stroke} />
+    </svg>
+  );
+}
+
+export function LinkIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" {...stroke} />
+    </svg>
+  );
+}
+
+export function HighlightIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m14.5 4.5 5 5L11 18H6v-5z" {...stroke} />
+      <path d="M3 21h18" stroke="var(--yellow)" strokeWidth="3.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function AlignIcon({ size = 20, al }: P & { al: "left" | "center" | "right" }) {
+  const d = { left: "M4 6h16M4 10h10M4 14h16M4 18h10", center: "M4 6h16M7 10h10M4 14h16M7 18h10", right: "M4 6h16M10 10h10M4 14h16M10 18h10" }[al];
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d={d} {...stroke} />
+    </svg>
+  );
+}
+
+export function GalleryIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="8" height="7" rx="2" {...stroke} /><rect x="13" y="4" width="8" height="7" rx="2" {...stroke} />
+      <rect x="3" y="13" width="8" height="7" rx="2" {...stroke} /><rect x="13" y="13" width="8" height="7" rx="2" {...stroke} />
+    </svg>
+  );
+}
+
+export function CalloutIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="4" {...stroke} />
+      <path d="M8 4v16" {...stroke} />
+      <path d="M12 10h5M12 14h4" {...stroke} />
+    </svg>
+  );
+}
+
+export function DividerIcon({ size = 20 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 12h4M17 12h4" {...stroke} />
+      <path d="m12 9 3 3-3 3-3-3z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function ArrowIcon({ size = 18, dir }: P & { dir: "up" | "down" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={dir === "down" ? { transform: "rotate(180deg)" } : undefined}>
+      <path d="M12 19V5M6 11l6-6 6 6" {...stroke} />
+    </svg>
+  );
+}
+
+export function TrashIcon({ size = 18 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13" {...stroke} />
+    </svg>
+  );
+}
+
+export function DotsIcon({ size = 18 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="6" r="1.7" fill="currentColor" /><circle cx="15" cy="6" r="1.7" fill="currentColor" />
+      <circle cx="9" cy="12" r="1.7" fill="currentColor" /><circle cx="15" cy="12" r="1.7" fill="currentColor" />
+      <circle cx="9" cy="18" r="1.7" fill="currentColor" /><circle cx="15" cy="18" r="1.7" fill="currentColor" />
+    </svg>
+  );
+}

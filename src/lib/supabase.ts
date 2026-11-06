@@ -1,7 +1,8 @@
 // Ligação com o Supabase (banco das publicações, fotos e login da equipe).
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { isAlinhamento, type Bloco, type Post } from "./data";
+import { isAlinhamento, type Post } from "./data";
+import { limparDoc } from "./doc";
 import { validW } from "./rich";
 import { AUTH_STORAGE_KEY, SUPABASE_KEY, SUPABASE_URL } from "./supabaseConfig";
 
@@ -31,7 +32,8 @@ export type PostRow = {
   titulo_al: string | null;
   titulo_w: number | null;
   resumo: string;
-  corpo: Bloco[];
+  /** Documento do editor (ou, nas publicações antigas, a lista de blocos). */
+  corpo: unknown;
   imagens: string[];
 };
 
@@ -51,7 +53,7 @@ export function rowToPost(r: PostRow): Post {
     tituloAl: isAlinhamento(r.titulo_al) && r.titulo_al !== "left" ? r.titulo_al : undefined,
     tituloW: validW(r.titulo_w) ? r.titulo_w : undefined,
     resumo: r.resumo,
-    corpo: Array.isArray(r.corpo) ? r.corpo : [],
+    corpo: limparDoc(r.corpo),
     imagens: imagens.length ? imagens : undefined,
   };
 }

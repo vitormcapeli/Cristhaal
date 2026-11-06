@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useConectado } from "@/lib/sessao";
 import { useToast } from "./Toast";
 
-/** Na página de um post, para quem entrou com a conta da equipe: apagar a publicação. */
+/** Na página de um post, para quem entrou com a conta da equipe: editar ou apagar a publicação. */
 export function PostAdmin({ id, titulo }: { id: string; titulo: string }) {
   const conectado = useConectado();
   const router = useRouter();
@@ -36,9 +37,12 @@ export function PostAdmin({ id, titulo }: { id: string; titulo: string }) {
   return (
     <div className="post-admin">
       <span>Você está conectado com a conta da equipe.</span>
+      <span className="post-admin-acoes">
+      <Link className="btn small" href={`/publicar?editar=${encodeURIComponent(id)}`}>Editar publicação</Link>
       <button className="btn small danger" type="button" onClick={apagar} disabled={apagando}>
         {apagando ? "Apagando…" : "Apagar publicação"}
       </button>
+      </span>
     </div>
   );
 }

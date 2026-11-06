@@ -6,10 +6,17 @@ import { avisarSessao } from "@/lib/sessao";
 import { supabaseNavegador } from "@/lib/supabase";
 import { Composer } from "./Composer";
 
-/** /publicar: pede o login da equipe e, depois de entrar, mostra o editor. */
+/** /publicar: pede o login da equipe e, depois de entrar, mostra o editor. /publicar?editar=<id> edita uma publicação. */
 export function EditorGate() {
   // undefined: ainda verificando; null: ninguém conectado.
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined);
+  // O endereço só é lido no navegador (a página é pré-renderizada sem ele).
+  const [editarId, setEditarId] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- o endereço só existe no navegador
+    setEditarId(new URLSearchParams(location.search).get("editar"));
+  }, []);
 
   useEffect(() => {
     const sb = supabaseNavegador();
@@ -19,7 +26,7 @@ export function EditorGate() {
     return () => { vivo = false; data.subscription.unsubscribe(); };
   }, []);
 
-  if (sessao === undefined) return <p className="help">Carregando…</p>;
+  if (sessao === undefined || editarId === undefined) return <p className="help">Carregando…</p>;
   if (!sessao) return <Entrar />;
 
   const sair = async () => {
@@ -30,17 +37,18 @@ export function EditorGate() {
   return (
     <>
       <div className="compose-head">
-        <h1>Nova publicação</h1>
+        <h1>{editarId ? "Editar publicação" : "Nova publicação"}</h1>
         <p>
           Escreva direto na página: ela já está do jeito que vai aparecer no portal. Clique na frente, no título, nas letras
-          das áreas ou no texto para mudar. O rascunho fica salvo neste navegador até você publicar.
+          das áreas ou no texto para mudar. Digite <kbd>/</kbd> numa linha vazia para inserir imagem, vídeo, galeria, citação e mais.
+          {editarId ? " As mudanças só valem depois de salvar." : " O rascunho fica salvo neste navegador até você publicar."}
         </p>
         <p className="sessao">
           Conectado como <b>{sessao.user.email}</b>
           <button className="link-btn" type="button" onClick={sair}>Sair</button>
         </p>
       </div>
-      <Composer />
+      <Composer key={editarId ?? "novo"} editarId={editarId} />
     </>
   );
 }

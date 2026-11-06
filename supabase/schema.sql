@@ -15,7 +15,8 @@ create table if not exists public.posts (
   titulo_al   text check (titulo_al in ('left', 'center', 'right')),
   titulo_w    int check (titulo_w between 25 and 100),
   resumo      text not null default '',
-  -- Blocos do texto: [{ "p": "..." }, { "h": "..." }, { "ul": [...] }, { "img": "url", "leg": "..." }, { "steps": true }]
+  -- Texto: documento do editor (JSON do Tiptap/ProseMirror; ver src/lib/doc.ts). Publicações antigas guardam
+  -- uma lista de blocos ([{ "p": "..." }, { "h": "..." }, ...]), convertida ao ler.
   corpo       jsonb not null default '[]',
   -- Fotos da capa e da galeria (URLs do Storage). A primeira é a capa.
   imagens     text[] not null default '{}',

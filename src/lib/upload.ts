@@ -1,7 +1,7 @@
 "use client";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { imageToDataUrl } from "./editor";
+import { imageToDataUrl } from "./imagem";
 import { BUCKET } from "./supabaseConfig";
 
 /**

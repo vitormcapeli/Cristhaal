@@ -1,6 +1,8 @@
 // Constantes do portal (áreas, frentes, autores, coordenação e links) e os tipos das publicações.
 // As publicações vêm do Supabase (src/lib/posts.ts); as de exemplo estão em supabase/exemplos.sql.
 
+import type { Doc } from "./doc";
+
 export type AreaKey = "C" | "R" | "I" | "S" | "T" | "H" | "A1" | "A2" | "L";
 export type FrenteKey = "educa" | "experimenta" | "inspira" | "geral";
 export type AutorKey = "equipe" | "coord";
@@ -8,9 +10,12 @@ export type AutorKey = "equipe" | "coord";
 export type Area = { k: AreaKey; l: string; n: string; c: string; rest: string };
 export type Frente = { nome: string; full: string; c: string; seed: number; text?: string };
 export type Alinhamento = "left" | "center" | "right";
-/** Largura (em % da largura do post) e alinhamento de um bloco. Sem `w`, ocupa a coluna de texto. */
+/** Largura (em % da largura do post) e alinhamento de um bloco, no formato antigo. */
 export type Caixa = { w?: number; al?: Alinhamento };
-/** Blocos do texto. Em `p` e `ul`, `**negrito**` e `*itálico*` (com `\` para escapar). */
+/**
+ * Formato antigo do texto (publicações de antes do editor Tiptap): uma lista de blocos, com
+ * `**negrito**` e `*itálico*` em `p` e `ul`. Ao ler, vira documento (src/lib/doc.ts).
+ */
 export type Bloco = (
   | { p: string }
   | { h: string }
@@ -34,7 +39,8 @@ export type Post = {
   /** Largura do cabeçalho, em % da largura do post. Sem valor, a largura padrão. */
   tituloW?: number;
   resumo: string;
-  corpo: Bloco[];
+  /** O texto, já limpo (src/lib/doc.ts). */
+  corpo: Doc;
   /** Fotos reais (URLs). Enquanto vazio, a galeria mostra ilustrações. */
   imagens?: string[];
 };

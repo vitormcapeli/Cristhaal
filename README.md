@@ -32,11 +32,11 @@ Abra http://localhost:3000.
 | `/publicacoes/[id]` | Publicação com capa, texto, galeria e navegação para a anterior e a próxima |
 | `/galeria` | Todas as fotos das publicações, agrupadas por encontro |
 | `/quem-somos` | História do projeto, Programa Decolar, coordenação, objetivos e contato (Instagram) |
-| `/publicar` | Login da equipe e editor de nova publicação, no formato da página final. Não aparece no Google; no menu, só para quem entrou |
+| `/publicar` | Login da equipe e editor de publicação, no formato da página final (`/publicar?editar=<id>` edita uma existente). Não aparece no Google; no menu, só para quem entrou |
 
 ## Onde mexer
 
-- **Publicações**: no Supabase (tabela `posts` e bucket `fotos`). A equipe publica em `/publicar` e apaga pelo botão na página do post; também dá para editar pelo Table Editor do Supabase.
+- **Publicações**: no Supabase (tabela `posts` e bucket `fotos`). A equipe publica em `/publicar` e edita ou apaga pelos botões na página do post.
 - **Constantes** (frentes, áreas, nomes da coordenação, links): `src/lib/data.ts`
 - **Visual** (cores, tipografia, layout, animações): `src/app/globals.css`
 - **Logo**: `src/lib/logoShape.ts` (peças e cores) e `src/components/Logo.tsx`. A animação de formação fica em `src/components/HeroLogo.tsx`.
@@ -52,8 +52,13 @@ Abra http://localhost:3000.
 
 ## Próximos passos
 
-- Editar uma publicação já publicada pelo próprio site (hoje: apagar e publicar de novo, ou o Table Editor).
 - O logo é uma releitura vetorial feita a partir de uma imagem. Com o arquivo original (SVG, AI ou PDF) dá para deixá-lo idêntico.
+
+## Editor
+
+Feito com [Tiptap](https://tiptap.dev) (`src/components/Composer.tsx` e os blocos próprios em `src/components/editor/nodes.tsx`). Tem subtítulos (dois níveis), negrito, itálico, marca-texto, links, alinhamento, listas com marcadores e numeradas, citação, caixa de destaque (nota, dica, atenção), divisória, imagem (no centro, larga ou com o texto ao lado), galeria, vídeo do YouTube e as etapas do experimento. Digitar `/` numa linha vazia abre o menu de blocos; selecionar texto mostra uma barrinha com a formatação; o botão na margem de cada bloco move ou apaga.
+
+O texto é salvo no banco como o JSON do editor. `src/lib/doc.ts` limpa o que entra (só passam os blocos acima, links http/https/e-mail, imagens do Storage do portal e vídeos do YouTube) e converte as publicações antigas, e `src/components/RichText.tsx` monta a página com componentes React, sem HTML cru.
 
 ## Stack
 
