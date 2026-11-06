@@ -40,10 +40,9 @@ function Bloco({ n, ctx }: { n: No; ctx: Ctx }): ReactNode {
     case "paragraph":
       return <p style={alinhado(n)}><Inline nodes={n.content} /></p>;
     case "heading": {
-      // No feed o título do post já é h3, então os subtítulos descem dois níveis.
-      const nivel = n.attrs?.level === 3 ? 3 : 2;
-      const H = ctx.inFeed ? (nivel === 3 ? "h5" : "h4") : nivel === 3 ? "h3" : "h2";
-      return <H className={nivel === 3 ? "prose-h3" : "prose-h2"} style={alinhado(n)}><Inline nodes={n.content} /></H>;
+      // No feed o título do post já é h3, então o subtítulo desce para h4.
+      const H = ctx.inFeed ? "h4" : "h2";
+      return <H className="prose-h2" style={alinhado(n)}><Inline nodes={n.content} /></H>;
     }
     case "bulletList":
       return <ul>{filhos}</ul>;

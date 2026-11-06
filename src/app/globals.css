@@ -181,7 +181,6 @@ a.row:hover { background: var(--soft) }
 /* No editor, imagens, galerias e vídeos ficam num envoltório sem caixa própria: o que vale é o de dentro. */
 .post-body > .react-renderer { display: contents }
 .prose-h2, .editor h2 { font-family: var(--display); font-size: 1.6rem; font-weight: 750; line-height: 1.15; letter-spacing: -.01em; margin: 36px 0 14px }
-.prose-h3, .editor h3 { font-family: var(--display); font-size: 1.22rem; font-weight: 750; line-height: 1.25; margin: 28px 0 10px }
 .prose ul, .prose ol:not(.steps) { padding-left: 1.5em; margin-top: 0; margin-bottom: 1em }
 /* Listas, citações e destaques ao lado de uma imagem lateral ficam inteiros, sem passar por baixo dela. */
 .post-body > :is(ul, ol, blockquote, aside) { display: flow-root }
@@ -354,28 +353,14 @@ a.row:hover { background: var(--soft) }
 .title-input { text-align: inherit }
 .editing { position: relative }
 .title-row { position: relative }
-.grip, .bt-add { width: 34px; height: 34px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--line) 30%, transparent); background: var(--surface); color: var(--ink); cursor: pointer; font: 700 1.3rem/1 var(--body); transition: border-color .15s, background .15s }
-.grip:hover, .bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
-.grip { cursor: ew-resize; touch-action: none }
-.grip:active { cursor: grabbing; background: var(--ink); color: var(--paper) }
-/* Alça do título na margem à esquerda, como a dos blocos (à direita quando o título está à direita). */
-.title-grip { position: absolute; top: 50%; right: calc(100% + 16px); transform: translateY(-50%) }
-.al-right .title-grip { right: auto; left: calc(100% + 28px) }
-/* Título muito largo: sem espaço ao lado, a alça sobe para cima dele. */
-.title-grip.above { top: -38px; left: auto; right: 0; transform: none }
-.al-right .title-grip.above { right: auto; left: 0 }
-/* Barrinha de largura do título, na borda do cabeçalho (do lado oposto quando ele está à direita) */
+.bt-add { width: 34px; height: 34px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--line) 30%, transparent); background: var(--surface); color: var(--ink); cursor: pointer; font: 700 1.3rem/1 var(--body); transition: border-color .15s, background .15s }
+.bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
 .editing .post-head { position: relative }
-.title-resize { top: 0; bottom: 0; left: calc(100% + 6px) }
-.al-right .title-resize { left: auto; right: calc(100% + 6px) }
-.editing .post-head:hover .title-resize { opacity: 1 }
-.title-resize-label { top: 50%; left: calc(100% + 28px) }
-.al-right .title-resize-label { left: auto; right: calc(100% + 28px) }
-.editing .title-grip { opacity: .45; transition: opacity .2s }
-.editing .post-head:hover .title-grip, .title-grip:focus-visible, .title-grip:active { opacity: 1 }
-.al-guides { position: absolute; left: 0; right: 0; z-index: 5; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: none }
-.al-guides span { display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; border: 2px dashed color-mix(in srgb, var(--fc) 45%, transparent); border-radius: 10px; font: 700 .72rem/1.4 var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; transform: translateY(-14px); height: calc(100% + 20px) }
-.al-guides span.on { background: color-mix(in srgb, var(--fc) 14%, transparent); border-color: var(--fc); color: var(--ink) }
+/* Ajustes do título (alinhamento e largura): barrinha que aparece ao passar o mouse ou editar o título */
+.media-tools.head-tools { top: -6px; bottom: auto; left: auto; right: 0; transform: none }
+.al-right > .media-tools.head-tools { right: auto; left: 0 }
+.editing .post-head:hover > .head-tools, .editing .post-head:focus-within > .head-tools { opacity: 1; pointer-events: auto }
+.tb-h { font: 800 1.1rem/1 var(--display) }
 
 /* Blocos: o + abre as opções, a alça alinha subtítulos */
 .editor-wrap { position: relative }
@@ -385,13 +370,6 @@ a.row:hover { background: var(--soft) }
 .side-tools .bt-add { width: 32px; height: 32px; font-size: 1.2rem }
 .bm-curto { width: 220px }
 .bm-curto button[disabled] { opacity: .4; cursor: default }
-.resize-h { position: absolute; z-index: 15; width: 12px; padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; opacity: 0; transition: opacity .2s }
-.resize-h::before { content: ""; position: absolute; left: 4px; top: 50%; width: 4px; height: min(56px, 70%); min-height: 18px; transform: translateY(-50%); border-radius: 4px; background: var(--fc) }
-.resize-h::after { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; border-left: 2px dashed color-mix(in srgb, var(--fc) 40%, transparent) }
-.editor-wrap:hover .resize-h, .resize-h:focus-visible, .resize-h.on { opacity: 1 }
-.resize-h:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px }
-.resize-label { position: absolute; z-index: 25; transform: translateY(-50%); padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 700 .8rem/1 var(--body); white-space: nowrap; pointer-events: none }
-.resize-label[data-side="l"] { transform: translate(-100%, -50%) }
 .block-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: 290px; display: grid; gap: 2px; padding: 6px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--hand-sm); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--ink) 70%, transparent); font-size: 1rem }
 .block-menu button { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; text-align: left; padding: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; cursor: pointer }
 .block-menu { max-height: min(420px, 60vh); overflow-y: auto }
@@ -401,7 +379,6 @@ a.row:hover { background: var(--soft) }
 .block-menu small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.3 }
 .bm-ic { width: 38px; height: 38px; display: grid; place-items: center; border: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent); border-radius: 8px; background: var(--paper) }
 .bm-h { font: 800 1.15rem/1 var(--display) !important }
-.bm-h3 { font-size: .9rem !important }
 .add-block { position: relative; max-width: var(--col); margin: 18px auto 0 }
 .add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 2px dashed color-mix(in srgb, var(--line) 35%, transparent); border-radius: 999px; background: transparent; color: var(--muted); font: 700 .95rem/1 var(--body); cursor: pointer; transition: color .15s, border-color .15s }
 .add-btn span { font-size: 1.25rem; line-height: .8 }
@@ -417,6 +394,11 @@ kbd { font: 700 .85em/1 var(--body); padding: 2px 6px; border: 1.5px solid color
 .post-body .img-block[data-pos="esquerda"] { float: left; margin-left: var(--gut); margin-right: 28px }
 .post-body .img-block[data-pos="direita"] { float: right; margin-right: var(--gut); margin-left: 28px }
 .post-body > :is(h2, h3, h4, h5) { clear: both }
+/* Uma imagem com texto ao lado no fim do texto não invade o que vem depois. */
+.post-body::after { content: ""; display: block; clear: both }
+/* Na imagem, a barrinha de ajustes fica logo acima dela, alinhada à borda (longe das ferramentas da margem). */
+.img-block > .media-tools { top: -46px; left: 0; transform: none }
+.img-block[data-pos="direita"] > .media-tools { left: auto; right: 0 }
 .img-block img { display: block; width: 100%; height: auto; border: 2px solid var(--line); border-radius: var(--hand-sm) }
 .img-block figcaption, .img-leg { display: block; width: 100%; margin-top: 8px; font: .92rem/1.4 var(--body); color: var(--muted); text-align: center }
 .img-leg { border: 0; padding: 4px; background: transparent; border-radius: 6px; outline: 1.5px dashed transparent }
@@ -455,11 +437,6 @@ kbd { font: 700 .85em/1 var(--body); padding: 2px 6px; border: 1.5px solid color
 .media-tools button[aria-pressed="true"] { background: var(--paper); color: var(--ink) }
 .mt-sep { width: 1px; height: 18px; margin: 0 4px; background: color-mix(in srgb, var(--paper) 30%, transparent) }
 .mt-info { padding: 0 8px; opacity: .8 }
-.media-resize { position: absolute; top: 0; bottom: 34px; right: -16px; width: 12px; padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; opacity: 0; transition: opacity .2s }
-.media-resize[data-side="l"] { right: auto; left: -16px }
-.media-resize::before { content: ""; position: absolute; left: 4px; top: 50%; width: 4px; height: 56px; transform: translateY(-50%); border-radius: 4px; background: var(--fc) }
-.img-block:hover .media-resize, .img-block.is-sel .media-resize, .media-resize:focus-visible { opacity: 1 }
-.media-label { top: 50%; right: -24px; transform: translate(100%, -50%) }
 /* Barrinha flutuante ao selecionar texto */
 .bubble { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ink); color: var(--paper); box-shadow: 0 10px 24px -12px #000; z-index: 45 }
 .bubble button { height: 34px; min-width: 34px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 8px; background: transparent; color: inherit; font: 700 .9rem/1 var(--body); cursor: pointer }
@@ -539,19 +516,14 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
   *, *::before, *::after { animation: none !important; transition: none !important }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important }
 }
-@media (max-width: 900px) {
-  .title-grip, .al-right .title-grip { top: -38px; left: auto; right: 0; transform: none }
-  .al-right .title-grip { right: auto; left: 0 }
-}
 @media (max-width: 640px) {
   /* No celular todo bloco ocupa a largura da tela; a largura escolhida vale para telas maiores. */
   .prose.post-body > *, .post-head[data-w], .post-body .img-block, .post-body .gal-block, .post-body .video-block { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; float: none !important }
   .post-body .gal-block[data-n] { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-  .media-resize, .add-dica { display: none }
+  .add-dica { display: none }
   .media-tools { top: auto; bottom: 44px; max-width: calc(100% - 12px); overflow-x: auto }
   .tb-tools { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100% }
   .tb-insert .block-menu { position: fixed; top: auto; left: 12px; right: 12px; width: auto }
-  .resize-h { display: none }
   .tb-label, .save-state { display: none }
   .tb { min-width: 38px; padding: 0 8px }
   .tb-sep { margin: 0 1px }

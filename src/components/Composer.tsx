@@ -21,12 +21,12 @@ import { arquivosParaImagens } from "@/lib/imagem";
 import { postsMudaram } from "@/app/actions";
 import { BUCKET, COLUNAS, postToRow, rowToPost, supabaseNavegador, type PostRow as Linha } from "@/lib/supabase";
 import { enviarImagem } from "@/lib/upload";
-import { validW, W_MIN } from "@/lib/rich";
+import { validW } from "@/lib/rich";
 import { semAcento } from "@/lib/search";
 import { CrystalArt } from "./CrystalArt";
 import { Destaque, Etapas, Figura, Galeria, SairDoBloco, Video } from "./editor/nodes";
 import {
-  AlignIcon, ArrowIcon, CalloutIcon, DividerIcon, DotsIcon, GalleryIcon, GripIcon, HighlightIcon, LinkIcon, ListIcon,
+  AlignIcon, ArrowIcon, CalloutIcon, DividerIcon, DotsIcon, GalleryIcon, HighlightIcon, LinkIcon, ListIcon,
   OrderedListIcon, PhotoIcon, QuoteIcon, RedoIcon, StepsIcon, TrashIcon, UndoIcon, YoutubeIcon,
 } from "./Icons";
 import { Author, PostRow } from "./PostRow";
@@ -49,17 +49,14 @@ const carimbo = () => Date.now().toString(36);
 /** Mantém a seleção no texto quando se clica num botão da barra. */
 const keepSelection = (e: React.MouseEvent) => e.preventDefault();
 
-/** Largura padrão do cabeçalho do post, igual ao max-width de .post-head no CSS. */
-const HEAD_PX = 800;
 
 // Blocos que se inserem pelo +, pelo / e pelo botão Inserir -------------------------------------
 
-type Tipo = "h2" | "h3" | "ul" | "ol" | "quote" | "callout" | "imagem" | "galeria" | "video" | "divisoria" | "etapas";
+type Tipo = "h2" | "ul" | "ol" | "quote" | "callout" | "imagem" | "galeria" | "video" | "divisoria" | "etapas";
 type Item = { t: Tipo; nome: string; desc: string; icon: React.ReactNode; busca: string };
 
 const ITENS: Item[] = [
   { t: "h2", nome: "Subtítulo", desc: "Título de uma parte do texto", icon: <b className="bm-h">T</b>, busca: "subtitulo titulo h2" },
-  { t: "h3", nome: "Subtítulo menor", desc: "Título dentro de uma parte", icon: <b className="bm-h bm-h3">T</b>, busca: "subtitulo menor topico h3" },
   { t: "ul", nome: "Lista", desc: "Itens com marcadores", icon: <ListIcon />, busca: "lista marcadores topicos" },
   { t: "ol", nome: "Lista numerada", desc: "Passo 1, passo 2…", icon: <OrderedListIcon />, busca: "lista numerada numeros passos" },
   { t: "quote", nome: "Citação", desc: "A fala de alguém, em destaque", icon: <QuoteIcon />, busca: "citacao fala aspas depoimento" },
@@ -74,7 +71,6 @@ const ITENS: Item[] = [
 /** Bloco novo, vazio, de cada tipo de texto, e onde fica o cursor dentro dele. */
 const NOVO: Partial<Record<Tipo, [JSONContent, number]>> = {
   h2: [{ type: "heading", attrs: { level: 2 } }, 1],
-  h3: [{ type: "heading", attrs: { level: 3 } }, 1],
   ul: [{ type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph" }] }] }, 3],
   ol: [{ type: "orderedList", content: [{ type: "listItem", content: [{ type: "paragraph" }] }] }, 3],
   quote: [{ type: "blockquote", content: [{ type: "paragraph" }] }, 2],
@@ -132,66 +128,23 @@ function BlockMenu({ itens, onPick, onClose, ativo, style, focar = true }: {
   );
 }
 
-// Cabeçalho: alça de posição e largura do título (como antes) -------------------------------------
+// Cabeçalho: posição e largura do título, por botões ----------------------------------------------
 
-/** Largura (em %) para a posição x do ponteiro. Perto da largura padrão devolve null ("voltar ao padrão"). */
-function larguraNoPonto(x: number, areaW: number, al: Alinhamento, left: number, padraoPx: number): number | null {
-  const px = al === "center" ? 2 * Math.abs(x - areaW / 2) : al === "right" ? areaW - x : x - left;
-  const pct = Math.max(W_MIN, Math.min(100, (px / areaW) * 100));
-  const padrao = Math.min(100, (padraoPx / areaW) * 100);
-  return Math.abs(pct - padrao) < 3 ? null : Math.round(pct / 5) * 5;
-}
+/** Larguras do título, em % da largura do post (null = a largura padrão, alinhada ao texto). */
+const LARGURAS_TITULO: [string, number | null][] = [["Normal", null], ["Larga", 85], ["Inteira", 100]];
 
-const nomeLargura = (w: number | null, padrao: string) => (w === null ? padrao : w === 100 ? "Largura total" : `${w}% da largura`);
-
-function AlignGrip({ value, onChange, area, onDrag, label, className = "" }: {
-  value: Alinhamento; onChange: (a: Alinhamento) => void; area: () => HTMLElement | null;
-  onDrag?: (on: boolean) => void; label: string; className?: string;
-}) {
-  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const el = area();
-    if (!el || e.button !== 0) return;
-    e.preventDefault();
-    const btn = e.currentTarget;
-    btn.setPointerCapture(e.pointerId);
-    const r = el.getBoundingClientRect();
-    onDrag?.(true);
-    const move = (ev: PointerEvent) => {
-      const x = (ev.clientX - r.left) / r.width;
-      onChange(x < 1 / 3 ? "left" : x < 2 / 3 ? "center" : "right");
-    };
-    const up = () => {
-      btn.removeEventListener("pointermove", move);
-      btn.removeEventListener("pointerup", up);
-      btn.removeEventListener("pointercancel", up);
-      onDrag?.(false);
-    };
-    btn.addEventListener("pointermove", move);
-    btn.addEventListener("pointerup", up);
-    btn.addEventListener("pointercancel", up);
-  };
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const i = ALS.indexOf(value);
-    const j = e.key === "ArrowLeft" ? i - 1 : e.key === "ArrowRight" ? i + 1 : -9;
-    if (j < 0 || j > 2) return;
-    e.preventDefault();
-    onChange(ALS[j]);
-  };
+function TituloTools({ al, w, onAl, onW }: { al: Alinhamento; w: number | null; onAl: (a: Alinhamento) => void; onW: (w: number | null) => void }) {
   return (
-    <button
-      type="button" className={`grip ${className}`} title="Arraste para os lados para alinhar"
-      aria-label={`${label}: ${AL_NOME[value]}. Arraste para os lados ou use as setas.`}
-      onPointerDown={onPointerDown} onKeyDown={onKeyDown} onMouseDown={keepSelection}
-    >
-      <GripIcon />
-    </button>
-  );
-}
-
-function Guides({ al, style }: { al: Alinhamento; style: React.CSSProperties }) {
-  return (
-    <div className="al-guides" style={style} aria-hidden="true">
-      {ALS.map((a) => <span key={a} className={a === al ? "on" : undefined}>{AL_NOME[a].replace(/^(à|no) /, "")}</span>)}
+    <div className="media-tools head-tools" role="toolbar" aria-label="Ajustes do título">
+      {ALS.map((a) => (
+        <button key={a} type="button" aria-pressed={al === a} title={`Título ${AL_NOME[a]}`} aria-label={`Título ${AL_NOME[a]}`} onClick={() => onAl(a)}>
+          <AlignIcon al={a} size={16} />
+        </button>
+      ))}
+      <span className="mt-sep" />
+      {LARGURAS_TITULO.map(([nome, v]) => (
+        <button key={nome} type="button" aria-pressed={w === v} title={`Largura do título: ${nome.toLowerCase()}`} onClick={() => onW(v)}>{nome}</button>
+      ))}
     </div>
   );
 }
@@ -234,8 +187,6 @@ export function Composer({ editarId }: { editarId?: string | null }) {
   const [titulo, setTitulo] = useState("");
   const [tituloAl, setTituloAl] = useState<Alinhamento>("left");
   const [tituloW, setTituloW] = useState<number | null>(null);
-  const [rotuloTitulo, setRotuloTitulo] = useState<string | null>(null);
-  const [arrastoTitulo, setArrastoTitulo] = useState<{ top: number; h: number } | null>(null);
   const [frente, setFrente] = useState<FrenteKey>("educa");
   const [areas, setAreas] = useState<AreaKey[]>(["C"]);
   const [corpo, setCorpo] = useState<Doc>({ type: "doc", content: [] });
@@ -274,7 +225,7 @@ export function Composer({ editarId }: { editarId?: string | null }) {
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [2, 3] },
+        heading: { levels: [2] },
         code: false, codeBlock: false, strike: false, underline: false,
         link: {
           openOnClick: false, autolink: true, linkOnPaste: true, defaultProtocol: "https",
@@ -312,8 +263,8 @@ export function Composer({ editarId }: { editarId?: string | null }) {
         acoes.current.arquivos(files, { from: pos, to: pos });
         return true;
       },
-      // O portal tem dois níveis de subtítulo: título 1 vira subtítulo, títulos 4 a 6 viram subtítulo menor.
-      transformPastedHTML: (html) => html.replace(/<(\/?)h1\b/gi, "<$1h2").replace(/<(\/?)h[4-6]\b/gi, "<$1h3"),
+      // O portal tem um nível de subtítulo: qualquer título colado (h1 a h6) vira subtítulo.
+      transformPastedHTML: (html) => html.replace(/<(\/?)h[1-6]\b/gi, "<$1h2"),
     },
     onUpdate: ({ editor: ed }) => {
       setCorpo(ed.getJSON() as Doc);
@@ -325,7 +276,7 @@ export function Composer({ editarId }: { editarId?: string | null }) {
   const st = useEditorState({
     editor,
     selector: ({ editor: ed }) => ed ? {
-      estilo: ed.isActive("heading", { level: 2 }) ? "h2" : ed.isActive("heading", { level: 3 }) ? "h3" : "p",
+      h: ed.isActive("heading"),
       bold: ed.isActive("bold"), italic: ed.isActive("italic"), highlight: ed.isActive("highlight"), link: ed.isActive("link"),
       ul: ed.isActive("bulletList"), ol: ed.isActive("orderedList"), quote: ed.isActive("blockquote"), callout: ed.isActive("callout"),
       tom: (ed.getAttributes("callout").tom as Tom) ?? "nota",
@@ -576,11 +527,10 @@ export function Composer({ editarId }: { editarId?: string | null }) {
 
   // Barra de ferramentas ---------------------------------------------------------------------------
 
-  const estilo = (v: string) => {
+  const subtitulo = () => {
     if (!editor) return;
-    const c = editor.chain().focus();
-    if (v === "p") c.setParagraph().run();
-    else c.setHeading({ level: v === "h3" ? 3 : 2 }).run();
+    if (editor.isActive("heading")) editor.chain().focus().setParagraph().run();
+    else editor.chain().focus().setHeading({ level: 2 }).run();
   };
 
   const abrirLink = () => {
@@ -622,43 +572,6 @@ export function Composer({ editarId }: { editarId?: string | null }) {
   };
 
   // Cabeçalho ---------------------------------------------------------------------------------------
-
-  const startResizeTitulo = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const art = articleRef.current;
-    const head = headRef.current;
-    if (!art || !head || e.button !== 0) return;
-    e.preventDefault();
-    const btn = e.currentTarget;
-    btn.setPointerCapture(e.pointerId);
-    const r = art.getBoundingClientRect();
-    // O cabeçalho começa alinhado à coluna de texto, não na borda do post.
-    const inicio = head.getBoundingClientRect().left - r.left;
-    setRotuloTitulo(nomeLargura(tituloW, "Largura padrão"));
-    const move = (ev: PointerEvent) => {
-      const w = larguraNoPonto(ev.clientX - r.left, r.width, tituloAl, inicio, HEAD_PX);
-      setTituloW(w);
-      setRotuloTitulo(nomeLargura(w, "Largura padrão"));
-    };
-    const up = () => {
-      btn.removeEventListener("pointermove", move);
-      btn.removeEventListener("pointerup", up);
-      btn.removeEventListener("pointercancel", up);
-      setRotuloTitulo(null);
-    };
-    btn.addEventListener("pointermove", move);
-    btn.addEventListener("pointerup", up);
-    btn.addEventListener("pointercancel", up);
-  };
-
-  const onResizeTituloKey = (e: React.KeyboardEvent) => {
-    const d = e.key === "ArrowRight" ? 5 : e.key === "ArrowLeft" ? -5 : 0;
-    const art = articleRef.current;
-    const head = headRef.current;
-    if (!d || !art || !head) return;
-    e.preventDefault();
-    const atual = tituloW ?? Math.round((head.offsetWidth / art.clientWidth) * 100);
-    setTituloW(Math.max(W_MIN, Math.min(100, Math.round((atual + d) / 5) * 5)));
-  };
 
   const toggleArea = (k: AreaKey) => {
     setAreas((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : AREAS.map((a) => a.k).filter((x) => x === k || prev.includes(x))));
@@ -777,14 +690,7 @@ export function Composer({ editarId }: { editarId?: string | null }) {
       <div className="editor-bar" role="toolbar" aria-label="Ferramentas do texto">
         <div className="tb-tools">
           <div className="tb-group">
-            <label className="tb tb-select" title="Estilo do parágrafo">
-              <span className="sr-only">Estilo do parágrafo</span>
-              <select value={st?.estilo ?? "p"} onChange={(e) => estilo(e.target.value)} onMouseDown={(e) => e.stopPropagation()}>
-                <option value="p">Texto</option>
-                <option value="h2">Subtítulo</option>
-                <option value="h3">Subtítulo menor</option>
-              </select>
-            </label>
+            <Tb on={st?.h} label="Subtítulo" title="Subtítulo (liga e desliga)" onClick={subtitulo}><b className="tb-h">T</b><span className="tb-label">Subtítulo</span></Tb>
           </div>
           <span className="tb-sep" />
           <div className="tb-group">
@@ -846,18 +752,11 @@ export function Composer({ editarId }: { editarId?: string | null }) {
       {carregando && <p className="help">Abrindo a publicação…</p>}
 
       <article className="post-full editing" ref={articleRef} hidden={carregando}>
-        {arrastoTitulo && <Guides al={tituloAl} style={{ top: arrastoTitulo.top, height: arrastoTitulo.h }} />}
         <div
           ref={headRef} className={tituloAl === "left" ? "post-head" : `post-head al-${tituloAl}`}
           {...(tituloW !== null ? { "data-w": String(tituloW), style: { width: `${tituloW}%`, "--w": `${tituloW}%` } as React.CSSProperties } : null)}
         >
-          <button
-            type="button" className={`resize-h title-resize${rotuloTitulo ? " on" : ""}`}
-            title="Arraste para mudar a largura do título (dois cliques voltam à largura padrão)"
-            aria-label={`Largura do título: ${nomeLargura(tituloW, "largura padrão")}. Arraste ou use as setas.`}
-            onPointerDown={startResizeTitulo} onKeyDown={onResizeTituloKey} onDoubleClick={() => setTituloW(null)}
-          />
-          {rotuloTitulo && <span className="resize-label title-resize-label">{rotuloTitulo}</span>}
+          <TituloTools al={tituloAl} w={tituloW} onAl={(a) => { setTituloAl(a); setMudou(true); }} onW={(v) => { setTituloW(v); setMudou(true); }} />
           <label className="fr fr-edit" style={{ "--fc": F.c } as React.CSSProperties}>
             <span className="sr-only">Frente</span>
             <select value={frente} onChange={(e) => { setFrente(e.target.value as FrenteKey); setMudou(true); }}>
@@ -870,11 +769,6 @@ export function Composer({ editarId }: { editarId?: string | null }) {
               placeholder="Título da publicação" value={titulo}
               onChange={(e) => { setTitulo(e.target.value.replace(/\s*\n\s*/g, " ")); setErro(""); setMudou(true); }}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); editor?.commands.focus("start"); } }}
-            />
-            <AlignGrip
-              className={`title-grip${tituloW !== null && tituloW >= 90 ? " above" : ""}`} label="Posição do título" value={tituloAl}
-              onChange={(a) => { setTituloAl(a); setMudou(true); }} area={() => articleRef.current}
-              onDrag={(on) => { const h = headRef.current; setArrastoTitulo(on && h ? { top: h.offsetTop, h: h.offsetHeight } : null); }}
             />
           </div>
           <div className="meta">

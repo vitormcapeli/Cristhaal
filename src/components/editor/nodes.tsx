@@ -9,62 +9,33 @@ import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tip
 import { useId, useState } from "react";
 import { youtubeId, type Foto, type Pos } from "@/lib/doc";
 import { arquivosParaImagens } from "@/lib/imagem";
-import { W_MIN } from "@/lib/rich";
 import { PhotoIcon } from "../Icons";
 import { Steps } from "../Steps";
 
 /** Atributo guardado no nó mas desenhado à mão no renderHTML. */
 const attr = (def: unknown) => ({ default: def, rendered: false });
 
-/** Largura da coluna de texto, igual a --col no CSS. */
-const COL_REM = 42;
-const colunaPx = (el: HTMLElement) => Math.min(el.clientWidth, COL_REM * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16));
-
 // Imagem ------------------------------------------------------------------------------------------
 
-const POS_NOME: Record<Pos, string> = { esquerda: "À esquerda, texto ao lado", centro: "No centro", direita: "À direita, texto ao lado" };
+const POS_NOME: Record<Pos, string> = { esquerda: "À esquerda, com o texto ao lado", centro: "No centro", direita: "À direita, com o texto ao lado" };
+/**
+ * Tamanhos fixos, sem arrastar. No centro, em % da largura do post (Média = a coluna do texto);
+ * com o texto ao lado, em % da coluna do texto.
+ */
 const TAMANHOS: Record<"centro" | "lado", [string, number | null][]> = {
-  centro: [["Coluna", null], ["Larga", 80], ["Inteira", 100]],
-  lado: [["Menor", 35], ["Maior", 50]],
+  centro: [["Pequena", 40], ["Média", null], ["Grande", 80], ["Inteira", 100]],
+  lado: [["Pequena", 35], ["Média", 45], ["Grande", 55]],
 };
 
-function FiguraView({ node, updateAttributes, deleteNode, selected, editor }: NodeViewProps) {
+function FiguraView({ node, updateAttributes, deleteNode, selected }: NodeViewProps) {
   const { src, legenda, w, pos } = node.attrs as { src: string; legenda: string; w: number | null; pos: Pos };
-  const [rotulo, setRotulo] = useState<string | null>(null);
   const lado = pos !== "centro";
-
-  const redimensionar = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    const btn = e.currentTarget;
-    const fig = btn.closest("figure")!;
-    const area = editor.view.dom as HTMLElement;
-    btn.setPointerCapture(e.pointerId);
-    const r = area.getBoundingClientRect();
-    const f = fig.getBoundingClientRect();
-    const col = colunaPx(area);
-    const move = (ev: PointerEvent) => {
-      let pct: number;
-      if (pos === "centro") pct = ((2 * Math.abs(ev.clientX - (r.left + r.width / 2))) / r.width) * 100;
-      else pct = ((pos === "esquerda" ? ev.clientX - f.left : f.right - ev.clientX) / col) * 100;
-      let nw: number | null = Math.round(Math.max(W_MIN, Math.min(100, pct)) / 5) * 5;
-      // No centro, perto da largura da coluna volta ao padrão.
-      if (pos === "centro" && Math.abs(pct - (col / r.width) * 100) < 3) nw = null;
-      updateAttributes({ w: nw });
-      setRotulo(nw === null ? "Coluna do texto" : lado ? `${nw}% da coluna` : nw === 100 ? "Largura inteira" : `${nw}% da largura`);
-    };
-    const up = () => {
-      btn.removeEventListener("pointermove", move);
-      btn.removeEventListener("pointerup", up);
-      btn.removeEventListener("pointercancel", up);
-      setRotulo(null);
-    };
-    btn.addEventListener("pointermove", move);
-    btn.addEventListener("pointerup", up);
-    btn.addEventListener("pointercancel", up);
+  const atual = lado ? (w ?? 45) : w;
+  const mudarPos = (p: Pos) => {
+    if (p === pos) return;
+    // Ao trocar entre centro e lado, volta ao tamanho médio de cada um.
+    updateAttributes({ pos: p, w: p === "centro" ? null : lado ? w : 45 });
   };
-
-  const mudarPos = (p: Pos) => updateAttributes({ pos: p, w: p === "centro" ? (lado ? null : w) : lado ? w : 45 });
 
   return (
     <NodeViewWrapper
@@ -85,22 +56,11 @@ function FiguraView({ node, updateAttributes, deleteNode, selected, editor }: No
         ))}
         <span className="mt-sep" />
         {TAMANHOS[lado ? "lado" : "centro"].map(([nome, v]) => (
-          <button key={nome} type="button" aria-pressed={(w ?? null) === v || (lado && w === null && v === 35)} onClick={() => updateAttributes({ w: v })}>{nome}</button>
+          <button key={nome} type="button" aria-pressed={atual === v} title={`Tamanho: ${nome.toLowerCase()}`} onClick={() => updateAttributes({ w: v })}>{nome}</button>
         ))}
         <span className="mt-sep" />
         <button type="button" onClick={deleteNode}>Remover</button>
       </div>
-      <button
-        type="button" className="media-resize" data-side={pos === "direita" ? "l" : "r"} onPointerDown={redimensionar}
-        title="Arraste para mudar o tamanho" aria-label="Tamanho da imagem"
-        onKeyDown={(e) => {
-          const d = e.key === "ArrowRight" ? 5 : e.key === "ArrowLeft" ? -5 : 0;
-          if (!d) return;
-          e.preventDefault();
-          updateAttributes({ w: Math.max(W_MIN, Math.min(100, (w ?? (lado ? 45 : 60)) + (pos === "direita" ? -d : d))) });
-        }}
-      />
-      {rotulo && <span className="resize-label media-label">{rotulo}</span>}
     </NodeViewWrapper>
   );
 }
