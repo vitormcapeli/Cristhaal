@@ -15,6 +15,7 @@ function Trecho({ n }: { n: No }) {
     if (m.type === "bold") el = <strong>{el}</strong>;
     else if (m.type === "italic") el = <em>{el}</em>;
     else if (m.type === "highlight") el = <mark>{el}</mark>;
+    else if (m.type === "tamanho") el = <span className={`fs-${m.attrs.t}`}>{el}</span>;
   }
   const link = marcas.find((m) => m.type === "link");
   const href = link && "attrs" in link ? linkSeguro(link.attrs.href) : null;
@@ -39,11 +40,6 @@ function Bloco({ n, ctx }: { n: No; ctx: Ctx }): ReactNode {
   switch (n.type) {
     case "paragraph":
       return <p style={alinhado(n)}><Inline nodes={n.content} /></p>;
-    case "heading": {
-      // No feed o título do post já é h3, então o subtítulo desce para h4.
-      const H = ctx.inFeed ? "h4" : "h2";
-      return <H className="prose-h2" style={alinhado(n)}><Inline nodes={n.content} /></H>;
-    }
     case "bulletList":
       return <ul>{filhos}</ul>;
     case "orderedList":

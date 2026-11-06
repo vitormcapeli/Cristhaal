@@ -4,7 +4,7 @@
 // etapas do experimento e caixa de destaque. O que cada um guarda é o mesmo que src/lib/doc.ts
 // aceita e src/components/RichText.tsx mostra.
 
-import { Extension, Node, mergeAttributes } from "@tiptap/core";
+import { Extension, Mark, Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tiptap/react";
 import { useId, useState } from "react";
 import { youtubeId, type Foto, type Pos } from "@/lib/doc";
@@ -252,13 +252,29 @@ export const Etapas = Node.create({
 export const Destaque = Node.create({
   name: "callout",
   group: "block",
-  content: "(paragraph | heading | bulletList | orderedList)+",
+  content: "(paragraph | bulletList | orderedList)+",
   defining: true,
   addAttributes: () => ({
     tom: { default: "nota", parseHTML: (el) => el.getAttribute("data-tom") || "nota", renderHTML: (a) => ({ "data-tom": a.tom }) },
   }),
   parseHTML: () => [{ tag: "aside[data-callout]" }],
   renderHTML: ({ HTMLAttributes }) => ["aside", mergeAttributes({ class: "callout", "data-callout": "" }, HTMLAttributes), 0],
+});
+
+// Tamanho da letra --------------------------------------------------------------------------------
+
+/**
+ * Tamanho da letra de um trecho (pequeno, grande, maior, enorme). Não passa para a linha seguinte
+ * ao apertar Enter: depois de um título grande, volta-se a escrever no tamanho normal.
+ */
+export const Tamanho = Mark.create({
+  name: "tamanho",
+  keepOnSplit: false,
+  addAttributes: () => ({
+    t: { default: "g", parseHTML: (el) => el.getAttribute("data-tamanho") || "g", renderHTML: (a) => ({ "data-tamanho": a.t, class: `fs-${a.t}` }) },
+  }),
+  parseHTML: () => [{ tag: "span[data-tamanho]" }],
+  renderHTML: ({ HTMLAttributes }) => ["span", HTMLAttributes, 0],
 });
 
 /**
