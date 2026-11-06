@@ -56,7 +56,7 @@ Abra http://localhost:3000.
 
 ## Editor
 
-Feito com [Tiptap](https://tiptap.dev) (`src/components/Composer.tsx` e os blocos próprios em `src/components/editor/nodes.tsx`). Tem subtítulo, negrito, itálico, marca-texto, links, alinhamento, listas com marcadores e numeradas, citação, caixa de destaque (nota, dica, atenção), divisória, imagem (no centro ou com o texto ao lado, em tamanhos fixos: pequena, média, grande, inteira), galeria, vídeo do YouTube e as etapas do experimento. Digitar `/` numa linha vazia abre o menu de blocos; selecionar texto mostra uma barrinha com a formatação; o botão na margem de cada bloco move ou apaga.
+Feito com [Tiptap](https://tiptap.dev) (`src/components/Composer.tsx` e os blocos próprios em `src/components/editor/nodes.tsx`). Tem um só bloco de texto com tamanho de letra (A− e A+: pequeno, normal, grande, maior, enorme; títulos são texto maior), negrito, itálico, marca-texto, links, alinhamento, listas com marcadores e numeradas, citação, caixa de destaque (nota, dica, atenção), divisória, imagem (no centro ou com o texto ao lado, em tamanhos fixos: pequena, média, grande, inteira), galeria, vídeo do YouTube e as etapas do experimento. Digitar `/` numa linha vazia abre o menu de blocos; selecionar texto mostra uma barrinha com a formatação; o botão na margem de cada bloco move ou apaga.
 
 O texto é salvo no banco como o JSON do editor. `src/lib/doc.ts` limpa o que entra (só passam os blocos acima, links http/https/e-mail, imagens do Storage do portal e vídeos do YouTube) e converte as publicações antigas, e `src/components/RichText.tsx` monta a página com componentes React, sem HTML cru.
 

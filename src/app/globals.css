@@ -189,6 +189,13 @@ a.row:hover { background: var(--soft) }
 .prose li::marker { color: var(--fc, var(--ink)); font-weight: 700 }
 .prose a { color: inherit; font-weight: 600; text-decoration: underline; text-decoration-color: var(--fc, currentColor); text-decoration-thickness: 2px; text-underline-offset: 3px }
 .prose a:hover { background: color-mix(in srgb, var(--fc, var(--blue)) 12%, transparent); border-radius: 3px }
+/* Tamanho da letra (botões A− e A+ do editor). Os maiores usam a fonte de títulos. */
+.fs-p { font-size: .86em }
+.fs-g { font-size: 1.25em; line-height: 1.45 }
+.fs-gg { font-size: 1.6em; line-height: 1.22; font-family: var(--display); font-weight: 750; letter-spacing: -.01em }
+.fs-ggg { font-size: 2.15em; line-height: 1.12; font-family: var(--display); font-weight: 800; letter-spacing: -.015em }
+.prose p:has(.fs-gg, .fs-ggg) { margin-top: 1.5em; margin-bottom: .6em }
+.prose > p:first-child:has(.fs-gg, .fs-ggg) { margin-top: 0 }
 .prose mark { background: color-mix(in srgb, var(--yellow) 48%, transparent); color: inherit; padding: 0 .12em; border-radius: 3px }
 /* Citação: a fala de alguém, grande, com a barra na cor da frente */
 .prose .quote, .editor blockquote { margin: 32px auto; padding: 4px 0 4px 24px; border-left: 4px solid var(--fc, var(--ink)); font-family: var(--display); font-size: 1.32rem; font-weight: 650; line-height: 1.45; letter-spacing: -.005em }
@@ -360,7 +367,10 @@ a.row:hover { background: var(--soft) }
 .media-tools.head-tools { top: -6px; bottom: auto; left: auto; right: 0; transform: none }
 .al-right > .media-tools.head-tools { right: auto; left: 0 }
 .editing .post-head:hover > .head-tools, .editing .post-head:focus-within > .head-tools { opacity: 1; pointer-events: auto }
-.tb-h { font: 800 1.1rem/1 var(--display) }
+.tb-a { font: 800 1.02rem/1 var(--display); letter-spacing: -.02em }
+.tb-a-menor { font-size: .86rem }
+.tb-tam { display: inline-flex; align-items: center; justify-content: center; height: 40px; min-width: 62px; text-align: center; font-size: .82rem; font-weight: 700; color: var(--muted); white-space: nowrap }
+.bubble button[disabled] { opacity: .35; cursor: default }
 
 /* Blocos: o + abre as opções, a alça alinha subtítulos */
 .editor-wrap { position: relative }

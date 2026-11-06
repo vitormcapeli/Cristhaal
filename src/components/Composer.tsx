@@ -15,7 +15,7 @@ import {
 } from "@/lib/data";
 import {
   caminhoNoStorage, docVazio, imagensDoDoc, limparDoc, linkSeguro, normalizarLink, resumoDoDoc, trocarImagens,
-  type Doc, type Tom,
+  type Doc, type Tamanho as TamanhoLetra, type Tom,
 } from "@/lib/doc";
 import { arquivosParaImagens } from "@/lib/imagem";
 import { postsMudaram } from "@/app/actions";
@@ -24,7 +24,7 @@ import { enviarImagem } from "@/lib/upload";
 import { validW } from "@/lib/rich";
 import { semAcento } from "@/lib/search";
 import { CrystalArt } from "./CrystalArt";
-import { Destaque, Etapas, Figura, Galeria, SairDoBloco, Video } from "./editor/nodes";
+import { Destaque, Etapas, Figura, Galeria, SairDoBloco, Tamanho, Video } from "./editor/nodes";
 import {
   AlignIcon, ArrowIcon, CalloutIcon, DividerIcon, DotsIcon, GalleryIcon, HighlightIcon, LinkIcon, ListIcon,
   OrderedListIcon, PhotoIcon, QuoteIcon, RedoIcon, StepsIcon, TrashIcon, UndoIcon, YoutubeIcon,
@@ -43,6 +43,10 @@ const TOM_NOME: Record<Tom, string> = { nota: "Nota", dica: "Dica", atencao: "At
 const slug = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
 
+/** Tamanhos da letra, do menor ao maior ("n" é o normal, sem marca). */
+const ESCALA: (TamanhoLetra | "n")[] = ["p", "n", "g", "gg", "ggg"];
+const NOME_TAM: Record<TamanhoLetra | "n", string> = { p: "Pequeno", n: "Normal", g: "Grande", gg: "Maior", ggg: "Enorme" };
+
 /** Marca de tempo curta, para nomes únicos (id da publicação e arquivos). */
 const carimbo = () => Date.now().toString(36);
 
@@ -52,11 +56,10 @@ const keepSelection = (e: React.MouseEvent) => e.preventDefault();
 
 // Blocos que se inserem pelo +, pelo / e pelo botão Inserir -------------------------------------
 
-type Tipo = "h2" | "ul" | "ol" | "quote" | "callout" | "imagem" | "galeria" | "video" | "divisoria" | "etapas";
+type Tipo = "ul" | "ol" | "quote" | "callout" | "imagem" | "galeria" | "video" | "divisoria" | "etapas";
 type Item = { t: Tipo; nome: string; desc: string; icon: React.ReactNode; busca: string };
 
 const ITENS: Item[] = [
-  { t: "h2", nome: "Subtítulo", desc: "Título de uma parte do texto", icon: <b className="bm-h">T</b>, busca: "subtitulo titulo h2" },
   { t: "ul", nome: "Lista", desc: "Itens com marcadores", icon: <ListIcon />, busca: "lista marcadores topicos" },
   { t: "ol", nome: "Lista numerada", desc: "Passo 1, passo 2…", icon: <OrderedListIcon />, busca: "lista numerada numeros passos" },
   { t: "quote", nome: "Citação", desc: "A fala de alguém, em destaque", icon: <QuoteIcon />, busca: "citacao fala aspas depoimento" },
@@ -70,7 +73,6 @@ const ITENS: Item[] = [
 
 /** Bloco novo, vazio, de cada tipo de texto, e onde fica o cursor dentro dele. */
 const NOVO: Partial<Record<Tipo, [JSONContent, number]>> = {
-  h2: [{ type: "heading", attrs: { level: 2 } }, 1],
   ul: [{ type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph" }] }] }, 3],
   ol: [{ type: "orderedList", content: [{ type: "listItem", content: [{ type: "paragraph" }] }] }, 3],
   quote: [{ type: "blockquote", content: [{ type: "paragraph" }] }, 2],
@@ -225,7 +227,7 @@ export function Composer({ editarId }: { editarId?: string | null }) {
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [2] },
+        heading: false,
         code: false, codeBlock: false, strike: false, underline: false,
         link: {
           openOnClick: false, autolink: true, linkOnPaste: true, defaultProtocol: "https",
@@ -233,11 +235,10 @@ export function Composer({ editarId }: { editarId?: string | null }) {
           HTMLAttributes: { rel: "noopener noreferrer nofollow", target: null },
         },
       }),
-      TextAlign.configure({ types: ["heading", "paragraph"], alignments: ["left", "center", "right"] }),
-      Highlight,
+      TextAlign.configure({ types: ["paragraph"], alignments: ["left", "center", "right"] }),
+      Highlight, Tamanho,
       Placeholder.configure({
-        placeholder: ({ editor: ed, node }) => {
-          if (node.type.name === "heading") return "Subtítulo";
+        placeholder: ({ editor: ed }) => {
           if (ed.isEmpty) return "Conte como foi o encontro: quem participou, o que foi feito, o que os estudantes descobriram.";
           return "Escreva, ou digite / para inserir um bloco";
         },
@@ -263,8 +264,10 @@ export function Composer({ editarId }: { editarId?: string | null }) {
         acoes.current.arquivos(files, { from: pos, to: pos });
         return true;
       },
-      // O portal tem um nível de subtítulo: qualquer título colado (h1 a h6) vira subtítulo.
-      transformPastedHTML: (html) => html.replace(/<(\/?)h[1-6]\b/gi, "<$1h2"),
+      // Um só bloco de texto: títulos colados (h1 a h6) viram parágrafo em negrito, com letra maior.
+      transformPastedHTML: (html) => html
+        .replace(/<h([1-6])\b[^>]*>/gi, (_m, n: string) => `<p><strong><span data-tamanho="${Number(n) <= 2 ? "gg" : "g"}">`)
+        .replace(/<\/h[1-6]>/gi, "</span></strong></p>"),
     },
     onUpdate: ({ editor: ed }) => {
       setCorpo(ed.getJSON() as Doc);
@@ -276,7 +279,7 @@ export function Composer({ editarId }: { editarId?: string | null }) {
   const st = useEditorState({
     editor,
     selector: ({ editor: ed }) => ed ? {
-      h: ed.isActive("heading"),
+      tam: ((ed.getAttributes("tamanho").t as TamanhoLetra | undefined) ?? "n") as TamanhoLetra | "n",
       bold: ed.isActive("bold"), italic: ed.isActive("italic"), highlight: ed.isActive("highlight"), link: ed.isActive("link"),
       ul: ed.isActive("bulletList"), ol: ed.isActive("orderedList"), quote: ed.isActive("blockquote"), callout: ed.isActive("callout"),
       tom: (ed.getAttributes("callout").tom as Tom) ?? "nota",
@@ -527,10 +530,30 @@ export function Composer({ editarId }: { editarId?: string | null }) {
 
   // Barra de ferramentas ---------------------------------------------------------------------------
 
-  const subtitulo = () => {
+  /**
+   * Aumenta (d = 1) ou diminui (d = -1) a letra: do texto selecionado ou, sem seleção, da linha
+   * inteira onde está o cursor (e do que for digitado em seguida).
+   */
+  const tamanho = (d: 1 | -1) => {
     if (!editor) return;
-    if (editor.isActive("heading")) editor.chain().focus().setParagraph().run();
-    else editor.chain().focus().setHeading({ level: 2 }).run();
+    const { state } = editor;
+    const tipo = state.schema.marks.tamanho;
+    const atual = (editor.getAttributes("tamanho").t as TamanhoLetra | undefined) ?? "n";
+    const novo = ESCALA[Math.max(0, Math.min(ESCALA.length - 1, ESCALA.indexOf(atual) + d))];
+    const sel = state.selection;
+    let { from, to } = sel;
+    if (sel.empty) { from = sel.$from.start(); to = sel.$from.end(); }
+    const tr = state.tr;
+    if (from < to) {
+      tr.removeMark(from, to, tipo);
+      if (novo !== "n") tr.addMark(from, to, tipo.create({ t: novo }));
+    }
+    if (sel.empty) {
+      const outras = (state.storedMarks ?? sel.$from.marks()).filter((m) => m.type !== tipo);
+      tr.setStoredMarks(novo === "n" ? outras : [...outras, tipo.create({ t: novo })]);
+    }
+    editor.view.dispatch(tr);
+    editor.commands.focus();
   };
 
   const abrirLink = () => {
@@ -690,7 +713,9 @@ export function Composer({ editarId }: { editarId?: string | null }) {
       <div className="editor-bar" role="toolbar" aria-label="Ferramentas do texto">
         <div className="tb-tools">
           <div className="tb-group">
-            <Tb on={st?.h} label="Subtítulo" title="Subtítulo (liga e desliga)" onClick={subtitulo}><b className="tb-h">T</b><span className="tb-label">Subtítulo</span></Tb>
+            <Tb label="Diminuir a letra" disabled={st?.tam === "p"} onClick={() => tamanho(-1)}><span className="tb-a tb-a-menor" aria-hidden="true">A−</span></Tb>
+            <span className="tb-tam" aria-live="polite" title="Tamanho da letra">{NOME_TAM[st?.tam ?? "n"]}</span>
+            <Tb label="Aumentar a letra" disabled={st?.tam === "ggg"} onClick={() => tamanho(1)}><span className="tb-a" aria-hidden="true">A+</span></Tb>
           </div>
           <span className="tb-sep" />
           <div className="tb-group">
@@ -806,6 +831,8 @@ export function Composer({ editarId }: { editarId?: string | null }) {
                   <button type="button" onMouseDown={keepSelection} aria-pressed={st?.bold} aria-label="Negrito" onClick={() => editor.chain().focus().toggleBold().run()}><b>N</b></button>
                   <button type="button" onMouseDown={keepSelection} aria-pressed={st?.italic} aria-label="Itálico" onClick={() => editor.chain().focus().toggleItalic().run()}><i className="tb-i">I</i></button>
                   <button type="button" onMouseDown={keepSelection} aria-pressed={st?.highlight} aria-label="Marca-texto" onClick={() => editor.chain().focus().toggleHighlight().run()}><HighlightIcon size={18} /></button>
+                  <button type="button" onMouseDown={keepSelection} aria-label="Diminuir a letra" disabled={st?.tam === "p"} onClick={() => tamanho(-1)}><span className="tb-a tb-a-menor">A−</span></button>
+                  <button type="button" onMouseDown={keepSelection} aria-label="Aumentar a letra" disabled={st?.tam === "ggg"} onClick={() => tamanho(1)}><span className="tb-a">A+</span></button>
                   <button type="button" onMouseDown={keepSelection} aria-pressed={st?.link} aria-label="Link" onClick={abrirLink}><LinkIcon size={18} /><span>Link</span></button>
                 </>
               ) : (

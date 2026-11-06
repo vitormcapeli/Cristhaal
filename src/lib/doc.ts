@@ -8,7 +8,13 @@ import type { Bloco } from "./data";
 import { parseInline, validW } from "./rich";
 import { BUCKET, SUPABASE_URL } from "./supabaseConfig";
 
-export type Marca = { type: "bold" | "italic" | "highlight" } | { type: "link"; attrs: { href: string } };
+/** Tamanho da letra: pequeno, grande, maior e enorme (sem a marca, o normal). */
+export type Tamanho = "p" | "g" | "gg" | "ggg";
+export const TAMANHOS: Tamanho[] = ["p", "g", "gg", "ggg"];
+export type Marca =
+  | { type: "bold" | "italic" | "highlight" }
+  | { type: "link"; attrs: { href: string } }
+  | { type: "tamanho"; attrs: { t: Tamanho } };
 export type No = { type: string; attrs?: Record<string, unknown>; content?: No[]; text?: string; marks?: Marca[] };
 export type Doc = { type: "doc"; content: No[] };
 
@@ -100,6 +106,9 @@ function marcas(m: unknown): Marca[] {
     else if (x.type === "link" && !out.some((y) => y.type === "link")) {
       const href = linkSeguro(obj(x.attrs) ? x.attrs.href : null);
       if (href) out.push({ type: "link", attrs: { href } });
+    } else if (x.type === "tamanho" && !out.some((y) => y.type === "tamanho")) {
+      const t = obj(x.attrs) ? x.attrs.t : null;
+      if (TAMANHOS.includes(t as Tamanho)) out.push({ type: "tamanho", attrs: { t: t as Tamanho } });
     }
   }
   return out;
@@ -120,8 +129,22 @@ function inline(nodes: unknown): No[] {
 
 const comConteudo = (n: No, content: No[]): No => (content.length ? { ...n, content } : n);
 
-/** Blocos de texto que podem ir dentro de listas, citações e destaques. */
+/** Blocos de texto que podem ir dentro de citações e destaques. */
 const TEXTO = new Set(["paragraph", "heading", "bulletList", "orderedList"]);
+
+/**
+ * O portal tem um só bloco de texto, com tamanho de letra. Subtítulos (de publicações antigas ou
+ * de textos colados) viram parágrafo em negrito, no tamanho "maior".
+ */
+function comoTitulo(c: No[]): No[] {
+  return c.map((n) => {
+    if (n.type !== "text") return n;
+    const m: Marca[] = (n.marks ?? []).filter((x) => x.type !== "tamanho");
+    if (!m.some((x) => x.type === "bold")) m.push({ type: "bold" });
+    m.push({ type: "tamanho", attrs: { t: "gg" } });
+    return { ...n, marks: m };
+  });
+}
 
 function blocos(nodes: unknown, nivel: number, so?: Set<string>): No[] {
   const out: No[] = [];
@@ -137,9 +160,9 @@ function blocos(nodes: unknown, nivel: number, so?: Set<string>): No[] {
         break;
       }
       case "heading": {
-        const c = inline(n.content);
-        // Um só nível de subtítulo no portal.
-        if (c.length) out.push({ type: "heading", attrs: { level: 2, ...alinhamento(a) }, content: c });
+        const c = comoTitulo(inline(n.content));
+        const al = alinhamento(a);
+        if (c.length) out.push(al ? { type: "paragraph", attrs: al, content: c } : { type: "paragraph", content: c });
         break;
       }
       case "bulletList":
@@ -147,7 +170,7 @@ function blocos(nodes: unknown, nivel: number, so?: Set<string>): No[] {
         const itens: No[] = [];
         for (const li of Array.isArray(n.content) ? n.content : []) {
           if (!obj(li) || li.type !== "listItem") continue;
-          const c = blocos(li.content, nivel + 1, new Set(["paragraph", "bulletList", "orderedList"]));
+          const c = blocos(li.content, nivel + 1, new Set(["paragraph", "heading", "bulletList", "orderedList"]));
           if (c.length && c[0].type !== "paragraph") c.unshift({ type: "paragraph" });
           itens.push({ type: "listItem", content: c.length ? c : [{ type: "paragraph" }] });
         }
@@ -261,25 +284,31 @@ const textoDe = (n: No) => {
 export function textoDoDoc(doc: Doc): string {
   const partes: string[] = [];
   percorrer(doc.content, (n) => {
-    if (n.type === "paragraph" || n.type === "heading") partes.push(textoDe(n));
+    if (n.type === "paragraph") partes.push(textoDe(n));
     else if (n.type === "figura" || n.type === "video") partes.push(String(n.attrs?.legenda ?? ""));
     else if (n.type === "galeria") for (const f of (n.attrs?.fotos as Foto[]) ?? []) partes.push(f.legenda ?? "");
   });
   return partes.join(" ");
 }
 
-/** O começo do texto (o primeiro parágrafo com algo escrito), para a lista de publicações. */
+/** Parágrafo escrito todo em letra grande: funciona como título e não entra no resumo. */
+const ehTitulo = (n: No) => {
+  const t = (n.content ?? []).filter((x) => x.type === "text" && x.text?.trim());
+  return t.length > 0 && t.every((x) => x.marks?.some((m) => m.type === "tamanho" && m.attrs.t !== "p"));
+};
+
+/** O começo do texto (o primeiro parágrafo comum com algo escrito), para a lista de publicações. */
 export function resumoDoDoc(doc: Doc, max = 180): string {
   let r = "";
   percorrer(doc.content, (n) => {
-    if (!r && n.type === "paragraph") r = textoDe(n).replace(/\s+/g, " ").trim();
+    if (!r && n.type === "paragraph" && !ehTitulo(n)) r = textoDe(n).replace(/\s+/g, " ").trim();
   });
   return r.length > max ? `${r.slice(0, max - 1).trimEnd()}…` : r;
 }
 
 /** O documento não tem nada: nem texto, nem imagem, nem vídeo. */
 export const docVazio = (doc: Doc) =>
-  !doc.content.some((n) => !["paragraph", "heading"].includes(n.type) || textoDe(n).trim());
+  !doc.content.some((n) => n.type !== "paragraph" || textoDe(n).trim());
 
 /** Endereços de todas as imagens do texto. */
 export function imagensDoDoc(doc: Doc): string[] {
