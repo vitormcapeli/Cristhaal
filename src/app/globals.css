@@ -158,27 +158,54 @@ a.row:hover { background: var(--soft) }
 
 /* Publicação */
 .post { padding-block: clamp(28px, 5vw, 56px) 72px }
+/* Coluna de leitura centralizada. --gut é a margem à esquerda dela: o título, o "Voltar" e a barra
+   da equipe começam ali, alinhados ao texto. */
+.post, .post-full { --col: 42rem; --gut: max(0px, (100% - var(--col)) / 2) }
+.post > .back { margin-left: var(--gut) }
+.post > .post-admin { max-width: var(--col); margin-inline: auto }
 .back { display: inline-flex; gap: 6px; color: var(--muted); text-decoration: none; font-weight: 700; margin-bottom: 28px }
 .back:hover { color: var(--ink) }
-.post-head { max-width: 800px }
-.post-head[data-w] { max-width: none }
+.post-head { max-width: 800px; margin-left: max(0px, min(var(--gut), 100% - 800px)) }
+.post-head[data-w] { max-width: none; margin-left: max(0px, min(var(--gut), 100% - var(--w, 100%))) }
 .post-head h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); font-weight: 800; margin: 14px 0 18px }
 .post > h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); margin-bottom: 16px }
 .cover { margin: 32px 0; border: 2px solid var(--line); border-radius: var(--hand); overflow: hidden; aspect-ratio: 21/8 }
 .cover > svg, .cover > img { width: 100%; height: 100%; display: block; object-fit: cover }
 .prose { max-width: 68ch; font-size: 1.12rem; line-height: 1.72 }
-.prose ol.steps { margin: 8px 0 24px }
-/* Texto do post: cada bloco ocupa a coluna de texto, ou a largura escolhida no editor (data-w),
-   e pode ficar à esquerda, no centro ou à direita (data-al). */
-.prose.post-body { max-width: none; --col: 42rem }
-.prose.post-body > * { max-width: var(--col) }
-.prose.post-body > [data-w] { max-width: none }
-.prose.post-body > [data-al="center"] { margin-left: auto; margin-right: auto; text-align: center }
-.prose.post-body > [data-al="right"] { margin-left: auto; margin-right: 0; text-align: right }
+.prose ol.steps { margin-block: 8px 24px }
+/* Texto do post: cada bloco ocupa a coluna de texto, centralizada, ou a largura escolhida no editor
+   (data-w), também no centro. data-al="left"/"right" encosta o bloco na borda do post; "center"
+   (de publicações antigas) centraliza também o texto. */
+.prose.post-body { max-width: none }
+.prose.post-body > * { max-width: var(--col); margin-left: auto; margin-right: auto }
+/* No editor, imagens, galerias e vídeos ficam num envoltório sem caixa própria: o que vale é o de dentro. */
+.post-body > .react-renderer { display: contents }
 .prose-h2, .editor h2 { font-family: var(--display); font-size: 1.6rem; font-weight: 750; line-height: 1.15; letter-spacing: -.01em; margin: 36px 0 14px }
-.prose ul { padding-left: 1.4em; margin: 0 0 1em }
+.prose-h3, .editor h3 { font-family: var(--display); font-size: 1.22rem; font-weight: 750; line-height: 1.25; margin: 28px 0 10px }
+.prose ul, .prose ol:not(.steps) { padding-left: 1.5em; margin-top: 0; margin-bottom: 1em }
+/* Listas, citações e destaques ao lado de uma imagem lateral ficam inteiros, sem passar por baixo dela. */
+.post-body > :is(ul, ol, blockquote, aside) { display: flow-root }
 .prose li { margin: 4px 0; padding-left: 4px }
-.prose li::marker { color: var(--fc, var(--ink)) }
+.prose li > p { margin: 0 }
+.prose li::marker { color: var(--fc, var(--ink)); font-weight: 700 }
+.prose a { color: inherit; font-weight: 600; text-decoration: underline; text-decoration-color: var(--fc, currentColor); text-decoration-thickness: 2px; text-underline-offset: 3px }
+.prose a:hover { background: color-mix(in srgb, var(--fc, var(--blue)) 12%, transparent); border-radius: 3px }
+.prose mark { background: color-mix(in srgb, var(--yellow) 48%, transparent); color: inherit; padding: 0 .12em; border-radius: 3px }
+/* Citação: a fala de alguém, grande, com a barra na cor da frente */
+.prose .quote, .editor blockquote { margin: 32px auto; padding: 4px 0 4px 24px; border-left: 4px solid var(--fc, var(--ink)); font-family: var(--display); font-size: 1.32rem; font-weight: 650; line-height: 1.45; letter-spacing: -.005em }
+.prose .quote p:last-child, .editor blockquote p:last-child { margin-bottom: 0 }
+/* Caixa de destaque: nota (cor da frente), dica (verde) ou atenção (laranja) */
+.callout { --tc: var(--fc, var(--indigo)); position: relative; margin: 28px auto; padding: 16px 20px 16px 58px; border: 2px solid var(--line); border-radius: var(--hand-sm); background: color-mix(in srgb, var(--tc) 9%, var(--surface)); box-shadow: 4px 4px 0 color-mix(in srgb, var(--tc) 55%, transparent) }
+.callout[data-tom="dica"] { --tc: var(--green) }
+.callout[data-tom="atencao"] { --tc: var(--orange) }
+.callout::before { content: "i"; position: absolute; left: 16px; top: 16px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--tc); color: #fff; font: 800 .95rem/1 var(--display) }
+.callout[data-tom="dica"]::before { content: "✓" }
+.callout[data-tom="atencao"]::before { content: "!" }
+.callout > :last-child { margin-bottom: 0 }
+.callout > :first-child { margin-top: 0 }
+/* Divisória: três cristais na cor da frente */
+.prose hr, .editor hr { clear: both; height: 22px; margin: 40px auto; border: 0; overflow: visible; text-align: center; color: var(--fc, var(--ink)) }
+.prose hr::before, .editor hr::before { content: "◆   ◆   ◆"; white-space: pre; font-size: .8rem; letter-spacing: .2em }
 .gallery-title { font-size: 1.4rem; margin-top: 48px }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-top: 24px }
 .gallery figure { margin: 0; border: 2px solid var(--line); border-radius: var(--hand-sm); overflow: hidden; aspect-ratio: 4/3; background: var(--soft); position: relative }
@@ -291,9 +318,9 @@ a.row:hover { background: var(--soft) }
 
 /* O que é editável se mostra ao passar o mouse, sem mudar a cara da publicação. */
 .editing { padding-top: 12px }
-.editing :is(.title-input, .editor, .fr-edit select) { border-radius: 8px; outline: 2px dashed transparent; outline-offset: 6px; transition: outline-color .2s }
-.editing :is(.title-input, .editor, .fr-edit select):hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
-.editing :is(.title-input, .editor, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
+.editing :is(.title-input, .fr-edit select) { border-radius: 8px; outline: 2px dashed transparent; outline-offset: 6px; transition: outline-color .2s }
+.editing :is(.title-input, .fr-edit select):hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
+.editing :is(.title-input, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
 .fr-edit select { field-sizing: content; appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 22px 2px 0; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 8px top 55%, right 3px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
 .fr-edit select option { color: var(--ink); background: var(--surface) }
 .title-input { display: block; width: 100%; margin: 14px 0 18px; padding: 0; border: 0; background: transparent; color: var(--ink); resize: none; overflow: hidden; field-sizing: content; font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.015em }
@@ -305,13 +332,14 @@ a.row:hover { background: var(--soft) }
 .cover-edit { position: relative }
 .cover-btn { position: absolute; right: 14px; bottom: 14px }
 .cover-btn:focus-within { outline: 2px solid var(--ink); outline-offset: 3px }
-.editor { position: relative; min-height: 9em; caret-color: var(--fc) }
-.editor.is-empty::before { content: attr(data-placeholder); position: absolute; inset: 0 0 auto; max-width: var(--col); color: color-mix(in srgb, var(--muted) 70%, transparent); pointer-events: none }
+.editor { position: relative; min-height: 9em; caret-color: var(--fc); outline: none }
 .editor > :first-child { margin-top: 0 }
-.steps-embed { position: relative; margin: 8px 0 24px; padding: 4px 0 0; user-select: none; cursor: default }
+/* Texto de ajuda na linha vazia do cursor (o Tiptap só marca essa). */
+.editor .is-empty::before { content: attr(data-placeholder); float: left; height: 0; color: color-mix(in srgb, var(--muted) 65%, transparent); pointer-events: none }
+.editor .ProseMirror-selectednode { outline: none }
+.editor ::selection { background: color-mix(in srgb, var(--fc) 26%, transparent) }
+.steps-embed { position: relative; margin: 8px auto 24px; padding: 4px 0 0; max-width: var(--col); user-select: none; cursor: grab }
 .steps-embed ol.steps { margin: 0 }
-.embed-x { position: absolute; top: -12px; right: 0; font: 700 .8rem/1 var(--body); padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; opacity: 0; transition: opacity .2s }
-[data-block]:hover .embed-x, .embed-x:focus-visible { opacity: 1 }
 .ph-x { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: 800 1.1rem/1 var(--body); cursor: pointer }
 .ph-x:hover { background: var(--ink); color: var(--paper) }
 .add-tile { aspect-ratio: 4/3; display: grid; place-content: center; justify-items: center; gap: 6px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand-sm); color: var(--muted); font-weight: 700; cursor: pointer; position: relative }
@@ -319,7 +347,8 @@ a.row:hover { background: var(--soft) }
 .add-tile:focus-within { outline: 2px solid var(--ink); outline-offset: 2px }
 /* Alinhamento do título e dos subtítulos */
 .post-head.al-center { margin-inline: auto; text-align: center }
-.post-head.al-right { margin-left: auto; text-align: right }
+.post-head.al-right { margin-left: auto; margin-right: max(0px, min(var(--gut), 100% - min(800px, 100%))); text-align: right }
+.post-head.al-right[data-w] { margin-right: max(0px, min(var(--gut), 100% - var(--w, 100%))) }
 .post-head.al-center .meta { justify-content: center }
 .post-head.al-right .meta { justify-content: flex-end }
 .title-input { text-align: inherit }
@@ -329,8 +358,9 @@ a.row:hover { background: var(--soft) }
 .grip:hover, .bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
 .grip { cursor: ew-resize; touch-action: none }
 .grip:active { cursor: grabbing; background: var(--ink); color: var(--paper) }
-.title-grip { position: absolute; top: 50%; left: calc(100% + 28px); transform: translateY(-50%) }
-.al-right .title-grip { left: auto; right: calc(100% + 28px) }
+/* Alça do título na margem à esquerda, como a dos blocos (à direita quando o título está à direita). */
+.title-grip { position: absolute; top: 50%; right: calc(100% + 16px); transform: translateY(-50%) }
+.al-right .title-grip { right: auto; left: calc(100% + 28px) }
 /* Título muito largo: sem espaço ao lado, a alça sobe para cima dele. */
 .title-grip.above { top: -38px; left: auto; right: 0; transform: none }
 .al-right .title-grip.above { right: auto; left: 0 }
@@ -349,10 +379,12 @@ a.row:hover { background: var(--soft) }
 
 /* Blocos: o + abre as opções, a alça alinha subtítulos */
 .editor-wrap { position: relative }
-.block-tools { position: absolute; display: flex; gap: 6px; z-index: 20; opacity: 0; transition: opacity .2s; font-size: 1.12rem }
-.block-tools.above { transform: translateY(calc(-100% - 6px)) }
-.block-tools.above .block-menu { left: auto; right: 0 }
-.block-tools[hidden] { display: none }
+/* Ferramentas na margem esquerda do bloco sob o mouse: + (inserir depois) e ⋮⋮ (mover ou apagar) */
+.side-tools { position: absolute; z-index: 20; display: flex; gap: 6px; font-size: 1.12rem; opacity: .55; transition: opacity .2s }
+.side-tools:hover, .side-tools.open, .side-tools:focus-within { opacity: 1 }
+.side-tools .bt-add { width: 32px; height: 32px; font-size: 1.2rem }
+.bm-curto { width: 220px }
+.bm-curto button[disabled] { opacity: .4; cursor: default }
 .resize-h { position: absolute; z-index: 15; width: 12px; padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; opacity: 0; transition: opacity .2s }
 .resize-h::before { content: ""; position: absolute; left: 4px; top: 50%; width: 4px; height: min(56px, 70%); min-height: 18px; transform: translateY(-50%); border-radius: 4px; background: var(--fc) }
 .resize-h::after { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; border-left: 2px dashed color-mix(in srgb, var(--fc) 40%, transparent) }
@@ -360,28 +392,91 @@ a.row:hover { background: var(--soft) }
 .resize-h:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px }
 .resize-label { position: absolute; z-index: 25; transform: translateY(-50%); padding: 6px 10px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 700 .8rem/1 var(--body); white-space: nowrap; pointer-events: none }
 .resize-label[data-side="l"] { transform: translate(-100%, -50%) }
-.editor-wrap:hover .block-tools, .editor-wrap:focus-within .block-tools, .block-tools.open { opacity: 1 }
 .block-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: 290px; display: grid; gap: 2px; padding: 6px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--hand-sm); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--ink) 70%, transparent); font-size: 1rem }
 .block-menu button { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; text-align: left; padding: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; cursor: pointer }
-.block-menu button:hover, .block-menu button:focus-visible { background: var(--soft); outline: none }
+.block-menu { max-height: min(420px, 60vh); overflow-y: auto }
+.block-menu button:hover, .block-menu button:focus-visible, .block-menu button.on { background: var(--soft); outline: none }
+.bm-vazio { margin: 0; padding: 10px; color: var(--muted); font-size: .9rem }
 .block-menu b { display: block; font-size: .98rem }
 .block-menu small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.3 }
 .bm-ic { width: 38px; height: 38px; display: grid; place-items: center; border: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent); border-radius: 8px; background: var(--paper) }
 .bm-h { font: 800 1.15rem/1 var(--display) !important }
-.add-block { position: relative; margin-top: 18px }
+.bm-h3 { font-size: .9rem !important }
+.add-block { position: relative; max-width: var(--col); margin: 18px auto 0 }
 .add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 2px dashed color-mix(in srgb, var(--line) 35%, transparent); border-radius: 999px; background: transparent; color: var(--muted); font: 700 .95rem/1 var(--body); cursor: pointer; transition: color .15s, border-color .15s }
 .add-btn span { font-size: 1.25rem; line-height: .8 }
 .add-btn:hover, .add-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--line) }
+.add-dica { margin-left: 12px; font-size: .85rem; color: var(--muted) }
+kbd { font: 700 .85em/1 var(--body); padding: 2px 6px; border: 1.5px solid color-mix(in srgb, var(--line) 35%, transparent); border-bottom-width: 3px; border-radius: 5px; background: var(--surface) }
 
 /* Imagem no meio do texto */
-.img-block { position: relative; margin: 28px 0 }
+/* Imagem: na coluna, mais larga (data-w, % do post) ou de lado com o texto ao lado (data-pos, % da coluna) */
+.post-body .img-block { position: relative; clear: both; max-width: var(--col); margin: 32px auto }
+.post-body .img-block[data-w]:not([data-pos]) { width: calc(var(--w) * 1%); max-width: none }
+.post-body .img-block[data-pos] { clear: none; width: calc(min(var(--col), 100%) * var(--w, 45) / 100); max-width: none; margin-top: 6px; margin-bottom: 16px }
+.post-body .img-block[data-pos="esquerda"] { float: left; margin-left: var(--gut); margin-right: 28px }
+.post-body .img-block[data-pos="direita"] { float: right; margin-right: var(--gut); margin-left: 28px }
+.post-body > :is(h2, h3, h4, h5) { clear: both }
 .img-block img { display: block; width: 100%; height: auto; border: 2px solid var(--line); border-radius: var(--hand-sm) }
 .img-block figcaption, .img-leg { display: block; width: 100%; margin-top: 8px; font: .92rem/1.4 var(--body); color: var(--muted); text-align: center }
 .img-leg { border: 0; padding: 4px; background: transparent; border-radius: 6px; outline: 1.5px dashed transparent }
 .img-leg:hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
 .img-leg:focus { outline-color: var(--fc) }
 .img-leg::placeholder { color: color-mix(in srgb, var(--muted) 60%, transparent) }
-.img-block .embed-x { top: 10px; right: 10px }
+/* Galeria: várias fotos lado a lado */
+.post-body .gal-block { position: relative; clear: both; max-width: calc(var(--col) + 14rem); margin: 32px auto; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.post-body .gal-block[data-n="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.post-body .gal-block[data-n="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+.gal-block figure { position: relative; margin: 0 }
+.gal-block img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; border: 2px solid var(--line); border-radius: var(--hand-sm); transition: transform .2s }
+.gal-block a:hover img { transform: translateY(-2px) }
+.gal-block figcaption, .gal-block .img-leg { margin-top: 6px; font-size: .85rem; color: var(--muted); text-align: center }
+.gal-block .add-tile { min-height: 120px }
+/* Vídeo do YouTube */
+.post-body .video-block { position: relative; clear: both; max-width: calc(var(--col) + 8rem); margin: 32px auto }
+.video-frame { position: relative; aspect-ratio: 16/9; border: 2px solid var(--line); border-radius: var(--hand-sm); overflow: hidden; background: #000 }
+.video-frame iframe, .video-frame img { display: block; width: 100%; height: 100%; border: 0; object-fit: cover }
+.video-block figcaption { margin-top: 8px; font-size: .92rem; color: var(--muted); text-align: center }
+.video-play { position: absolute; left: 50%; top: 50%; width: 68px; height: 48px; transform: translate(-50%, -50%); border-radius: 14px; background: #e00 }
+.video-play::after { content: ""; position: absolute; left: 27px; top: 14px; border: 10px solid transparent; border-left: 16px solid #fff; border-right: 0 }
+.video-form { padding: 18px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand-sm); background: var(--surface) }
+.video-form label { display: block; margin-bottom: 10px; color: var(--muted); font-size: .95rem }
+.video-form label b { display: block; color: var(--ink); font-size: 1rem }
+.video-row { display: flex; flex-wrap: wrap; gap: 8px }
+.video-row .input { flex: 1 1 260px; padding: 9px 12px }
+.video-form .form-error { margin: 8px 0 0; font-size: .9rem }
+/* No editor: o bloco escolhido ganha contorno e uma barrinha de ajustes */
+.editor :is(.img-block, .gal-block, .video-block, .steps-embed).is-sel { outline: 3px solid var(--fc); outline-offset: 5px; border-radius: var(--hand-sm) }
+.media-tools { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: var(--ink); color: var(--paper); box-shadow: 0 8px 20px -10px #000; opacity: 0; pointer-events: none; transition: opacity .15s; white-space: nowrap; font-size: .82rem }
+.gal-block .media-tools, .steps-embed .media-tools { top: -18px }
+.is-sel > .media-tools, :is(.img-block, .gal-block, .video-block, .steps-embed):hover > .media-tools, .media-tools:focus-within { opacity: 1; pointer-events: auto }
+.media-tools button { height: 30px; min-width: 30px; padding: 0 10px; display: inline-grid; place-items: center; border: 0; border-radius: 999px; background: transparent; color: inherit; font: 700 .82rem/1 var(--body); cursor: pointer }
+.media-tools button:hover { background: color-mix(in srgb, var(--paper) 18%, transparent) }
+.media-tools button[aria-pressed="true"] { background: var(--paper); color: var(--ink) }
+.mt-sep { width: 1px; height: 18px; margin: 0 4px; background: color-mix(in srgb, var(--paper) 30%, transparent) }
+.mt-info { padding: 0 8px; opacity: .8 }
+.media-resize { position: absolute; top: 0; bottom: 34px; right: -16px; width: 12px; padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; opacity: 0; transition: opacity .2s }
+.media-resize[data-side="l"] { right: auto; left: -16px }
+.media-resize::before { content: ""; position: absolute; left: 4px; top: 50%; width: 4px; height: 56px; transform: translateY(-50%); border-radius: 4px; background: var(--fc) }
+.img-block:hover .media-resize, .img-block.is-sel .media-resize, .media-resize:focus-visible { opacity: 1 }
+.media-label { top: 50%; right: -24px; transform: translate(100%, -50%) }
+/* Barrinha flutuante ao selecionar texto */
+.bubble { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ink); color: var(--paper); box-shadow: 0 10px 24px -12px #000; z-index: 45 }
+.bubble button { height: 34px; min-width: 34px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 8px; background: transparent; color: inherit; font: 700 .9rem/1 var(--body); cursor: pointer }
+.bubble button:hover { background: color-mix(in srgb, var(--paper) 18%, transparent) }
+.bubble button[aria-pressed="true"] { background: var(--paper); color: var(--ink) }
+.bubble-link { display: flex; gap: 4px; align-items: center }
+.bubble-link input { width: min(260px, 60vw); height: 34px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; font-size: .92rem }
+/* Barra: seletor de estilo e o menu Inserir */
+.tb-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0 }
+.tb[disabled] { opacity: .35; cursor: default; background: transparent }
+.tb-select { padding: 0 4px }
+.tb-select select { appearance: none; border: 0; background: transparent; color: inherit; font: inherit; padding: 0 22px 0 6px; height: 36px; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 9px top 55%, right 4px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
+.tb-select select option { color: var(--ink); background: var(--surface) }
+.tb-tom { border: 1.5px solid color-mix(in srgb, var(--line) 30%, transparent) }
+.tb-insert { position: relative }
+.tb-plus { font-size: 1.3rem; line-height: .8 }
+.post-admin-acoes { display: flex; flex-wrap: wrap; gap: 8px }
 .preview-box { margin-top: 56px; max-width: 800px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand); padding: 18px }
 .field { display: grid; gap: 8px; margin-bottom: 20px }
 .field label, .field legend { font-weight: 700 }
@@ -450,10 +545,18 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
 }
 @media (max-width: 640px) {
   /* No celular todo bloco ocupa a largura da tela; a largura escolhida vale para telas maiores. */
-  .prose.post-body > *, .post-head[data-w] { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important }
+  .prose.post-body > *, .post-head[data-w], .post-body .img-block, .post-body .gal-block, .post-body .video-block { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; float: none !important }
+  .post-body .gal-block[data-n] { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .media-resize, .add-dica { display: none }
+  .media-tools { top: auto; bottom: 44px; max-width: calc(100% - 12px); overflow-x: auto }
+  .tb-tools { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100% }
+  .tb-insert .block-menu { position: fixed; top: auto; left: 12px; right: 12px; width: auto }
   .resize-h { display: none }
   .tb-label, .save-state { display: none }
   .tb { min-width: 38px; padding: 0 8px }
   .tb-sep { margin: 0 1px }
+  /* Barra em duas linhas: as ferramentas (rolando para o lado) numa, Cancelar/Descartar e Publicar na outra. */
+  .tb-sep { display: none }
+  .tb-group { gap: 0 }
   .tb-end { width: 100%; justify-content: flex-end }
 }
