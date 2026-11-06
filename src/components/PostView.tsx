@@ -36,7 +36,7 @@ export function PostArticle({ post: p, inFeed }: ArticleProps) {
     <article className={inFeed ? "post-full in-feed" : "post-full"}>
       <div
         className={p.tituloAl && p.tituloAl !== "left" ? `post-head al-${p.tituloAl}` : "post-head"}
-        {...(validW(p.tituloW) ? { "data-w": String(p.tituloW), style: { width: `${p.tituloW}%` } } : null)}
+        {...(validW(p.tituloW) ? { "data-w": String(p.tituloW), style: { width: `${p.tituloW}%`, "--w": `${p.tituloW}%` } as React.CSSProperties } : null)}
       >
         <FrenteTag frente={p.frente} />
         <Title>{inFeed ? <Link href={href}>{p.titulo}</Link> : p.titulo}</Title>

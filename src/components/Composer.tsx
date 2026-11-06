@@ -51,7 +51,8 @@ function larguraNoPonto(x: number, areaW: number, al: Alinhamento, left: number,
   return Math.abs(pct - padrao) < 3 ? null : Math.round(pct / 5) * 5;
 }
 
-const alOf = (el: HTMLElement): Alinhamento => (isAlinhamento(el.dataset.al) ? el.dataset.al : "left");
+/** Sem data-al o bloco fica na coluna de texto, que é centralizada: para a alça, "no centro". */
+const alOf = (el: HTMLElement): Alinhamento => (isAlinhamento(el.dataset.al) ? el.dataset.al : "center");
 const medir = (el: HTMLElement): Ativo => {
   const w = Number(el.dataset.w);
   return {
@@ -175,8 +176,10 @@ function BlockControls({ a, rotulo, redimensionando, menuAberto, onResize, onRes
   area: () => HTMLElement | null; children?: React.ReactNode;
 }) {
   const direita = a.left + a.width;
-  const aoLado = a.areaW - direita >= 110;
   const esq = a.al === "right";
+  // O + e a alça ficam na margem à esquerda do bloco, na altura da primeira linha. Sem espaço ali
+  // (bloco largo, encostado à esquerda ou no celular), sobem para cima dele, à direita.
+  const aoLado = a.left >= 96;
   return (
     <>
       <button
@@ -193,7 +196,7 @@ function BlockControls({ a, rotulo, redimensionando, menuAberto, onResize, onRes
       )}
       <div
         className={`block-tools${menuAberto ? " open" : ""}${aoLado ? "" : " above"}`}
-        style={aoLado ? { top: a.top, left: direita + 28 } : { top: a.top, right: Math.max(0, a.areaW - direita) }}
+        style={aoLado ? { top: a.top, left: a.left - 88 } : { top: a.top, right: Math.max(0, a.areaW - direita) }}
         hidden={redimensionando}
       >
         <button
@@ -418,10 +421,12 @@ export function Composer() {
     const imgs = files.filter((f) => f.type.startsWith("image/"));
     if (!imgs.length) return;
     const urls = await Promise.all(imgs.map((f) => imageToDataUrl(f).catch(() => "")));
-    const html = urls.filter(Boolean).map((u) => imgHtml(u)).join("");
+    // A foto entra mais larga que o texto (80% do post), no centro; a alça de largura ajusta.
+    const html = urls.filter(Boolean).map((u) => imgHtml(u, "", { w: 80 })).join("");
     if (!html) { setErro("Não foi possível abrir essa imagem."); return; }
-    const { nodes } = inserir(imgAlvo.current ?? alvoAtual(), html, true);
-    (nodes[0] as HTMLElement | undefined)?.querySelector("input")?.focus();
+    // O cursor continua no texto, logo abaixo da imagem; a legenda é só clicar nela.
+    const { depois } = inserir(imgAlvo.current ?? alvoAtual(), html, true);
+    if (depois) caretEm(depois);
     sync();
   };
 
@@ -490,7 +495,7 @@ export function Composer() {
   const limparStyle = (el: HTMLElement) => { if (!el.getAttribute("style")) el.removeAttribute("style"); };
 
   const alinhar = (el: HTMLElement, al: Alinhamento) => {
-    if (al === "left") delete el.dataset.al;
+    if (al === "center") delete el.dataset.al;
     else el.dataset.al = al;
     limparStyle(el);
     setAtivo(medir(el));
@@ -543,9 +548,11 @@ export function Composer() {
     const btn = e.currentTarget;
     btn.setPointerCapture(e.pointerId);
     const r = art.getBoundingClientRect();
+    // O cabeçalho começa alinhado à coluna de texto, não na borda do post.
+    const inicio = head.getBoundingClientRect().left - r.left;
     setRotuloTitulo(nomeLargura(tituloW, "Largura padrão"));
     const move = (ev: PointerEvent) => {
-      const w = larguraNoPonto(ev.clientX - r.left, r.width, tituloAl, 0, HEAD_PX);
+      const w = larguraNoPonto(ev.clientX - r.left, r.width, tituloAl, inicio, HEAD_PX);
       setTituloW(w);
       setRotuloTitulo(nomeLargura(w, "Largura padrão"));
     };
@@ -702,7 +709,7 @@ export function Composer() {
         {arrasto?.tipo === "titulo" && <Guides al={tituloAl} style={{ top: arrasto.top, height: arrasto.h }} />}
         <div
           ref={headRef} className={tituloAl === "left" ? "post-head" : `post-head al-${tituloAl}`}
-          {...(tituloW !== null ? { "data-w": String(tituloW), style: { width: `${tituloW}%` } } : null)}
+          {...(tituloW !== null ? { "data-w": String(tituloW), style: { width: `${tituloW}%`, "--w": `${tituloW}%` } as React.CSSProperties } : null)}
         >
           <button
             type="button" className={`resize-h title-resize${rotuloTitulo ? " on" : ""}`}

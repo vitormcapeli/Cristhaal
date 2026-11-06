@@ -43,7 +43,7 @@ export const validW = (w: unknown): w is number => typeof w === "number" && w >=
 /** Atributos de largura e alinhamento de um bloco, iguais no editor e na página do post. */
 export function boxProps(b: Caixa): BoxProps {
   const p: BoxProps = {};
-  if (b.al === "center" || b.al === "right") p["data-al"] = b.al;
+  if (b.al === "left" || b.al === "center" || b.al === "right") p["data-al"] = b.al;
   if (validW(b.w)) { p["data-w"] = String(b.w); p.style = { width: `${b.w}%` }; }
   return p;
 }

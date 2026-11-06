@@ -59,7 +59,7 @@ function inlineNode(c: Node, b: boolean, i: boolean): string {
 export function caixaDe(el: HTMLElement): Caixa {
   const c: Caixa = {};
   const al = el.dataset.al;
-  if (al === "center" || al === "right") c.al = al;
+  if (al === "left" || al === "center" || al === "right") c.al = al;
   const w = Number(el.dataset.w);
   if (validW(w)) c.w = Math.round(w);
   return c;

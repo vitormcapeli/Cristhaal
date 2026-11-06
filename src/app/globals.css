@@ -158,22 +158,29 @@ a.row:hover { background: var(--soft) }
 
 /* Publicação */
 .post { padding-block: clamp(28px, 5vw, 56px) 72px }
+/* Coluna de leitura centralizada. --gut é a margem à esquerda dela: o título, o "Voltar" e a barra
+   da equipe começam ali, alinhados ao texto. */
+.post, .post-full { --col: 42rem; --gut: max(0px, (100% - var(--col)) / 2) }
+.post > .back { margin-left: var(--gut) }
+.post > .post-admin { max-width: var(--col); margin-inline: auto }
 .back { display: inline-flex; gap: 6px; color: var(--muted); text-decoration: none; font-weight: 700; margin-bottom: 28px }
 .back:hover { color: var(--ink) }
-.post-head { max-width: 800px }
-.post-head[data-w] { max-width: none }
+.post-head { max-width: 800px; margin-left: max(0px, min(var(--gut), 100% - 800px)) }
+.post-head[data-w] { max-width: none; margin-left: max(0px, min(var(--gut), 100% - var(--w, 100%))) }
 .post-head h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); font-weight: 800; margin: 14px 0 18px }
 .post > h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); margin-bottom: 16px }
 .cover { margin: 32px 0; border: 2px solid var(--line); border-radius: var(--hand); overflow: hidden; aspect-ratio: 21/8 }
 .cover > svg, .cover > img { width: 100%; height: 100%; display: block; object-fit: cover }
 .prose { max-width: 68ch; font-size: 1.12rem; line-height: 1.72 }
-.prose ol.steps { margin: 8px 0 24px }
-/* Texto do post: cada bloco ocupa a coluna de texto, ou a largura escolhida no editor (data-w),
-   e pode ficar à esquerda, no centro ou à direita (data-al). */
-.prose.post-body { max-width: none; --col: 42rem }
-.prose.post-body > * { max-width: var(--col) }
+.prose ol.steps { margin-block: 8px 24px }
+/* Texto do post: cada bloco ocupa a coluna de texto, centralizada, ou a largura escolhida no editor
+   (data-w), também no centro. data-al="left"/"right" encosta o bloco na borda do post; "center"
+   (de publicações antigas) centraliza também o texto. */
+.prose.post-body { max-width: none }
+.prose.post-body > * { max-width: var(--col); margin-left: auto; margin-right: auto }
 .prose.post-body > [data-w] { max-width: none }
-.prose.post-body > [data-al="center"] { margin-left: auto; margin-right: auto; text-align: center }
+.prose.post-body > [data-al="left"] { margin-left: 0; margin-right: auto }
+.prose.post-body > [data-al="center"] { text-align: center }
 .prose.post-body > [data-al="right"] { margin-left: auto; margin-right: 0; text-align: right }
 .prose-h2, .editor h2 { font-family: var(--display); font-size: 1.6rem; font-weight: 750; line-height: 1.15; letter-spacing: -.01em; margin: 36px 0 14px }
 .prose ul { padding-left: 1.4em; margin: 0 0 1em }
@@ -291,9 +298,9 @@ a.row:hover { background: var(--soft) }
 
 /* O que é editável se mostra ao passar o mouse, sem mudar a cara da publicação. */
 .editing { padding-top: 12px }
-.editing :is(.title-input, .editor, .fr-edit select) { border-radius: 8px; outline: 2px dashed transparent; outline-offset: 6px; transition: outline-color .2s }
-.editing :is(.title-input, .editor, .fr-edit select):hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
-.editing :is(.title-input, .editor, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
+.editing :is(.title-input, .fr-edit select) { border-radius: 8px; outline: 2px dashed transparent; outline-offset: 6px; transition: outline-color .2s }
+.editing :is(.title-input, .fr-edit select):hover { outline-color: color-mix(in srgb, var(--line) 22%, transparent) }
+.editing :is(.title-input, .fr-edit select):focus { outline-color: color-mix(in srgb, var(--fc) 70%, transparent) }
 .fr-edit select { field-sizing: content; appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 22px 2px 0; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 8px top 55%, right 3px top 55%; background-size: 5px 5px; background-repeat: no-repeat }
 .fr-edit select option { color: var(--ink); background: var(--surface) }
 .title-input { display: block; width: 100%; margin: 14px 0 18px; padding: 0; border: 0; background: transparent; color: var(--ink); resize: none; overflow: hidden; field-sizing: content; font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.015em }
@@ -305,8 +312,8 @@ a.row:hover { background: var(--soft) }
 .cover-edit { position: relative }
 .cover-btn { position: absolute; right: 14px; bottom: 14px }
 .cover-btn:focus-within { outline: 2px solid var(--ink); outline-offset: 3px }
-.editor { position: relative; min-height: 9em; caret-color: var(--fc) }
-.editor.is-empty::before { content: attr(data-placeholder); position: absolute; inset: 0 0 auto; max-width: var(--col); color: color-mix(in srgb, var(--muted) 70%, transparent); pointer-events: none }
+.editor { position: relative; min-height: 9em; caret-color: var(--fc); outline: none }
+.editor.is-empty::before { content: attr(data-placeholder); position: absolute; inset: 0 0 auto; max-width: var(--col); margin-inline: auto; color: color-mix(in srgb, var(--muted) 70%, transparent); pointer-events: none }
 .editor > :first-child { margin-top: 0 }
 .steps-embed { position: relative; margin: 8px 0 24px; padding: 4px 0 0; user-select: none; cursor: default }
 .steps-embed ol.steps { margin: 0 }
@@ -319,7 +326,8 @@ a.row:hover { background: var(--soft) }
 .add-tile:focus-within { outline: 2px solid var(--ink); outline-offset: 2px }
 /* Alinhamento do título e dos subtítulos */
 .post-head.al-center { margin-inline: auto; text-align: center }
-.post-head.al-right { margin-left: auto; text-align: right }
+.post-head.al-right { margin-left: auto; margin-right: max(0px, min(var(--gut), 100% - min(800px, 100%))); text-align: right }
+.post-head.al-right[data-w] { margin-right: max(0px, min(var(--gut), 100% - var(--w, 100%))) }
 .post-head.al-center .meta { justify-content: center }
 .post-head.al-right .meta { justify-content: flex-end }
 .title-input { text-align: inherit }
@@ -329,8 +337,9 @@ a.row:hover { background: var(--soft) }
 .grip:hover, .bt-add:hover, .bt-add[aria-expanded="true"] { border-color: var(--line); background: var(--soft) }
 .grip { cursor: ew-resize; touch-action: none }
 .grip:active { cursor: grabbing; background: var(--ink); color: var(--paper) }
-.title-grip { position: absolute; top: 50%; left: calc(100% + 28px); transform: translateY(-50%) }
-.al-right .title-grip { left: auto; right: calc(100% + 28px) }
+/* Alça do título na margem à esquerda, como a dos blocos (à direita quando o título está à direita). */
+.title-grip { position: absolute; top: 50%; right: calc(100% + 16px); transform: translateY(-50%) }
+.al-right .title-grip { right: auto; left: calc(100% + 28px) }
 /* Título muito largo: sem espaço ao lado, a alça sobe para cima dele. */
 .title-grip.above { top: -38px; left: auto; right: 0; transform: none }
 .al-right .title-grip.above { right: auto; left: 0 }
@@ -368,7 +377,7 @@ a.row:hover { background: var(--soft) }
 .block-menu small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.3 }
 .bm-ic { width: 38px; height: 38px; display: grid; place-items: center; border: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent); border-radius: 8px; background: var(--paper) }
 .bm-h { font: 800 1.15rem/1 var(--display) !important }
-.add-block { position: relative; margin-top: 18px }
+.add-block { position: relative; max-width: var(--col); margin: 18px auto 0 }
 .add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 2px dashed color-mix(in srgb, var(--line) 35%, transparent); border-radius: 999px; background: transparent; color: var(--muted); font: 700 .95rem/1 var(--body); cursor: pointer; transition: color .15s, border-color .15s }
 .add-btn span { font-size: 1.25rem; line-height: .8 }
 .add-btn:hover, .add-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--line) }
@@ -382,6 +391,7 @@ a.row:hover { background: var(--soft) }
 .img-leg:focus { outline-color: var(--fc) }
 .img-leg::placeholder { color: color-mix(in srgb, var(--muted) 60%, transparent) }
 .img-block .embed-x { top: 10px; right: 10px }
+.steps-embed .embed-x { top: 14px }
 .preview-box { margin-top: 56px; max-width: 800px; border: 2px dashed color-mix(in srgb, var(--line) 45%, transparent); border-radius: var(--hand); padding: 18px }
 .field { display: grid; gap: 8px; margin-bottom: 20px }
 .field label, .field legend { font-weight: 700 }
@@ -455,5 +465,11 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: cent
   .tb-label, .save-state { display: none }
   .tb { min-width: 38px; padding: 0 8px }
   .tb-sep { margin: 0 1px }
+  /* Barra em duas linhas: as ferramentas numa, Descartar e Publicar na outra. "Texto" some porque
+     o botão Subtítulo já liga e desliga o subtítulo. */
+  .tb-sep, .tb-group:first-child .tb:first-child { display: none }
+  .tb-group { gap: 0 }
   .tb-end { width: 100%; justify-content: flex-end }
+  /* No celular os blocos não mudam de posição, então só o + aparece. */
+  .block-tools .grip { display: none }
 }
